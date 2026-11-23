@@ -718,7 +718,6 @@ def validate_uploaded_image(file):
             "The uploaded file is not a valid image."
         ) from error
 
-
 # =========================================================
 # SUPABASE PRODUCT IMAGE STORAGE
 # =========================================================
@@ -736,6 +735,22 @@ SUPABASE_BUCKET = os.getenv(
 ).strip()
 
 
+# =========================================================
+# SUPABASE CONFIGURATION DIAGNOSTICS
+# =========================================================
+
+app.logger.info(
+    "SUPABASE CONFIG CHECK: URL=%s, KEY_PRESENT=%s, BUCKET=%s",
+    bool(SUPABASE_URL),
+    bool(SUPABASE_SECRET_KEY),
+    SUPABASE_BUCKET
+)
+
+
+# =========================================================
+# SUPABASE HELPER FUNCTIONS
+# =========================================================
+
 def supabase_configured():
     return bool(
         SUPABASE_URL
@@ -745,15 +760,33 @@ def supabase_configured():
 
 
 def supabase_headers(content_type=None):
+    if not SUPABASE_SECRET_KEY:
+        raise RuntimeError(
+            "Supabase secret key is missing."
+        )
+
     headers = {
-        "Authorization": f"Bearer {SUPABASE_SECRET_KEY}",
         "apikey": SUPABASE_SECRET_KEY
     }
+
+    if SUPABASE_SECRET_KEY.startswith("eyJ"):
+        headers["Authorization"] = (
+            f"Bearer {SUPABASE_SECRET_KEY}"
+        )
+
+    elif SUPABASE_SECRET_KEY.startswith("sb_secret_"):
+        pass
+
+    else:
+        raise RuntimeError(
+            "Invalid Supabase key format."
+        )
 
     if content_type:
         headers["Content-Type"] = content_type
 
     return headers
+
 
 
 def get_image_content_type(extension):
@@ -763,6 +796,7 @@ def get_image_content_type(extension):
         "png": "image/png",
         "webp": "image/webp"
     }.get(extension.lower(), "application/octet-stream")
+
 
 
 def save_product_image(file):
@@ -776,9 +810,15 @@ def save_product_image(file):
             "Supabase image storage is not configured."
         )
 
+    if "." not in file.filename:
+        raise ValueError("Invalid image filename.")
+
     extension = secure_filename(
         file.filename.rsplit(".", 1)[1].lower()
     )
+
+    if extension not in {"jpg", "jpeg", "png", "webp"}:
+        raise ValueError("Unsupported image extension.")
 
     object_path = f"products/{uuid.uuid4().hex}.{extension}"
 
@@ -805,12 +845,30 @@ def save_product_image(file):
         timeout=30
     )
 
-    response.raise_for_status()
+    if not response.ok:
+        try:
+            error_details = response.json()
+        except ValueError:
+            error_details = response.text[:1000]
+
+        app.logger.error(
+            "SUPABASE STORAGE UPLOAD FAILED | "
+            "Status: %s | Details: %s",
+            response.status_code,
+            error_details
+        )
+
+        raise RuntimeError(
+            f"Supabase rejected image upload "
+            f"(HTTP {response.status_code}). "
+            f"Details: {error_details}"
+        )
 
     return (
         f"{SUPABASE_URL}/storage/v1/object/public/"
         f"{SUPABASE_BUCKET}/{object_path}"
     )
+
 
 
 def delete_product_image(image_reference):
@@ -2211,10 +2269,12 @@ def add_product():
     try:
         product_data = parse_product_form()
 
+        # Upload product image to Supabase
         image_name = save_product_image(
             request.files.get("image")
         )
 
+        # Create product record
         product = Product(
             name=product_data["name"],
             description=product_data["description"],
@@ -2230,6 +2290,11 @@ def add_product():
         db.session.add(product)
         db.session.commit()
 
+        app.logger.info(
+            "Product added successfully: %s",
+            product.name
+        )
+
         return admin_form_response(
             True,
             "Product added successfully.",
@@ -2240,22 +2305,26 @@ def add_product():
 
     except ValueError as error:
         db.session.rollback()
-        delete_product_image(image_name)
+
+        if image_name:
+            delete_product_image(image_name)
+
+        app.logger.warning(
+            "Product validation failed: %s",
+            str(error)
+        )
 
         if is_ajax_request():
-            return ajax_json(
-                False,
-                str(error),
-                400
-            )
+            return ajax_json(False, str(error), 400)
 
         flash(str(error), "danger")
-
         return render_add_product_page(categories)
 
     except IntegrityError:
         db.session.rollback()
-        delete_product_image(image_name)
+
+        if image_name:
+            delete_product_image(image_name)
 
         app.logger.exception(
             "Product database constraint failed."
@@ -2266,38 +2335,38 @@ def add_product():
         )
 
         if is_ajax_request():
-            return ajax_json(
-                False,
-                message,
-                409
-            )
+            return ajax_json(False, message, 409)
 
         flash(message, "danger")
-
         return render_add_product_page(categories)
 
-    except Exception:
+    except Exception as error:
         db.session.rollback()
-        delete_product_image(image_name)
 
-        app.logger.exception(
-            "Unable to add product."
-        )
+        if image_name:
+            delete_product_image(image_name)
 
-        message = (
-            "Unable to add product. Please try again."
-        )
+        print("\n========== PRODUCT ADD ERROR ==========")
+        print("ERROR TYPE:", type(error).__name__)
+        print("ERROR MESSAGE:", str(error))
+
+        import traceback
+        traceback.print_exc()
+
+        print("=======================================\n")
+
+        app.logger.exception("Unable to add product")
+
+        message = "Unable to add product. Please try again."
 
         if is_ajax_request():
-            return ajax_json(
-                False,
-                message,
-                500
-            )
+            return ajax_json(False, message, 500)
 
         flash(message, "danger")
-
         return render_add_product_page(categories)
+
+
+
 
 
 # =========================================================
