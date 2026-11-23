@@ -1,3 +1,4 @@
+
 <div id="addProductWrapper">
 
     <!-- SUCCESS / ERROR MESSAGES -->
@@ -31,7 +32,6 @@
                     <div class="card-body p-4">
 
                         <div class="mb-3">
-
                             <label for="name" class="form-label fw-semibold">
                                 Product Name <span class="text-danger">*</span>
                             </label>
@@ -43,11 +43,9 @@
                                    maxlength="150"
                                    placeholder="e.g. Wireless Headphones"
                                    required>
-
                         </div>
 
                         <div class="mb-3">
-
                             <label for="category_id" class="form-label fw-semibold">
                                 Category
                             </label>
@@ -65,11 +63,9 @@
                                 {% endfor %}
 
                             </select>
-
                         </div>
 
                         <div class="mb-0">
-
                             <label for="description" class="form-label fw-semibold">
                                 Description
                             </label>
@@ -80,7 +76,6 @@
                                       rows="4"
                                       placeholder="Describe your product..."
                                       maxlength="10000"></textarea>
-
                         </div>
 
                     </div>
@@ -101,16 +96,12 @@
                         <div class="row g-3">
 
                             <div class="col-md-6">
-
                                 <label for="price" class="form-label fw-semibold">
                                     Price (ETB) <span class="text-danger">*</span>
                                 </label>
 
                                 <div class="input-group input-group-lg">
-
-                                    <span class="input-group-text bg-light">
-                                        Br
-                                    </span>
+                                    <span class="input-group-text bg-light">Br</span>
 
                                     <input type="number"
                                            class="form-control"
@@ -120,12 +111,10 @@
                                            step="0.01"
                                            placeholder="0.00"
                                            required>
-
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-
                                 <label for="stock" class="form-label fw-semibold">
                                     Stock <span class="text-danger">*</span>
                                 </label>
@@ -138,11 +127,9 @@
                                        step="1"
                                        value="0"
                                        required>
-
                             </div>
 
                             <div class="col-md-6">
-
                                 <label for="icon" class="form-label fw-semibold">
                                     Icon (emoji)
                                 </label>
@@ -153,11 +140,9 @@
                                        name="icon"
                                        value="📦"
                                        maxlength="50">
-
                             </div>
 
                             <div class="col-md-6">
-
                                 <label for="tag" class="form-label fw-semibold">
                                     Tag
                                 </label>
@@ -168,7 +153,6 @@
                                        name="tag"
                                        placeholder="New Arrival"
                                        maxlength="50">
-
                             </div>
 
                         </div>
@@ -192,6 +176,7 @@
 
                     <div class="card-body p-4">
 
+                        <!-- UPLOAD ZONE -->
                         <label for="image"
                                id="uploadZone"
                                class="text-center p-4 rounded border border-2 border-dashed w-100 d-block"
@@ -210,9 +195,8 @@
                             <input type="file"
                                    id="image"
                                    name="image"
-                                   accept="image/jpeg,image/png,image/webp"
+                                   accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                                    style="display:none;">
-
                         </label>
 
                         <!-- IMAGE PREVIEW -->
@@ -220,14 +204,23 @@
                              class="text-center mt-3"
                              style="display:none;">
 
-                            <img id="imagePreview"
-                                 src=""
-                                 alt="Product image preview"
-                                 class="img-fluid rounded border shadow-sm"
-                                 style="max-height:200px;object-fit:contain;">
+                            <div class="border rounded p-2 bg-light">
 
-                            <div class="mt-2 text-muted small text-truncate"
+                                <img id="imagePreview"
+                                     src=""
+                                     alt="Product image preview"
+                                     class="img-fluid rounded"
+                                     style="width:100%;height:200px;object-fit:contain;">
+
+                            </div>
+
+                            <div class="mt-2 text-muted small text-break"
                                  id="imageName"></div>
+
+                            <div class="text-success small mt-1">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Image selected successfully
+                            </div>
 
                             <button type="button"
                                     class="btn btn-sm btn-outline-danger mt-2"
@@ -238,6 +231,13 @@
 
                             </button>
 
+                        </div>
+
+                        <!-- IMAGE ERROR -->
+                        <div id="imageError"
+                             class="text-danger small mt-2"
+                             role="alert"
+                             style="display:none;">
                         </div>
 
                     </div>
@@ -283,3 +283,127 @@
     </form>
 
 </div>
+
+<!-- IMAGE PREVIEW JAVASCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const imageInput = document.getElementById("image");
+    const previewContainer = document.getElementById("previewContainer");
+    const imagePreview = document.getElementById("imagePreview");
+    const imageName = document.getElementById("imageName");
+    const removeImageBtn = document.getElementById("removeImageBtn");
+    const uploadZone = document.getElementById("uploadZone");
+    const imageError = document.getElementById("imageError");
+    const productForm = document.getElementById("productForm");
+
+    let currentImageURL = null;
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
+    function showError(message) {
+        imageError.textContent = message;
+        imageError.style.display = "block";
+    }
+
+    function hideError() {
+        imageError.textContent = "";
+        imageError.style.display = "none";
+    }
+
+    function clearPreview() {
+
+        if (currentImageURL) {
+            URL.revokeObjectURL(currentImageURL);
+            currentImageURL = null;
+        }
+
+        imagePreview.src = "";
+        imageName.textContent = "";
+
+        previewContainer.style.display = "none";
+        uploadZone.style.display = "block";
+
+        hideError();
+    }
+
+    // DISPLAY SELECTED IMAGE
+    imageInput.addEventListener("change", function () {
+
+        hideError();
+
+        const file = this.files[0];
+
+        if (!file) {
+            clearPreview();
+            return;
+        }
+
+        // Validate image type
+        if (!allowedTypes.includes(file.type)) {
+
+            this.value = "";
+
+            clearPreview();
+
+            showError("Only JPG, JPEG, PNG and WEBP images are allowed.");
+
+            return;
+        }
+
+        // Validate maximum file size: 5MB
+        if (file.size > 5 * 1024 * 1024) {
+
+            this.value = "";
+
+            clearPreview();
+
+            showError("Image size must not exceed 5MB.");
+
+            return;
+        }
+
+        // Release previous preview
+        if (currentImageURL) {
+            URL.revokeObjectURL(currentImageURL);
+        }
+
+        // Create browser preview
+        currentImageURL = URL.createObjectURL(file);
+
+        imagePreview.src = currentImageURL;
+
+        imageName.textContent =
+            file.name + " (" + (file.size / (1024 * 1024)).toFixed(2) + " MB)";
+
+        previewContainer.style.display = "block";
+        uploadZone.style.display = "none";
+
+    });
+
+    // REMOVE SELECTED IMAGE
+    removeImageBtn.addEventListener("click", function () {
+
+        imageInput.value = "";
+
+        clearPreview();
+
+    });
+
+    // CLEAR FORM
+    productForm.addEventListener("reset", function () {
+
+        setTimeout(function () {
+
+            clearPreview();
+
+        }, 0);
+
+    });
+
+});
+</script>
