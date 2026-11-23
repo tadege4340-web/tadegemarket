@@ -1,0 +1,326 @@
+<div class="container-fluid py-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold">Order Details</h3>
+            <p class="text-muted mb-0">
+                Order #{{ order.id }}
+            </p>
+        </div>
+
+        <a href="{{ url_for('admin_orders') }}"
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    <!-- ORDER INFORMATION -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Order Information</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <strong>Order ID:</strong>
+                    #{{ order.id }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Order Date:</strong>
+                    {{ order.created_at }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Customer:</strong>
+                    {{ customer.full_name if customer else 'Unknown' }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Email:</strong>
+                    {{ customer.email if customer else 'N/A' }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Total Amount:</strong>
+                    {{ order.total_amount|currency }}
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Order Status:</strong>
+                    <span class="badge bg-primary">
+                        {{ order.status|capitalize }}
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER ITEMS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Ordered Products</h5>
+        </div>
+
+        <div class="card-body table-responsive">
+            <table class="table table-bordered align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>
+                            {{ item.product.name if item.product else 'Product unavailable' }}
+                        </td>
+
+                        <td>{{ item.quantity }}</td>
+
+                        <td>{{ item.unit_price|currency }}</td>
+
+                        <td>
+                            {{ (item.unit_price * item.quantity)|currency }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            No products found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+    <!-- DELIVERY INFORMATION -->
+    {% if payments %}
+        {% set latest_payment = payments[0] %}
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Delivery Information</h5>
+            </div>
+
+            <div class="card-body">
+                <p>
+                    <strong>Recipient:</strong>
+                    {{ latest_payment.recipient_name or 'N/A' }}
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    {{ latest_payment.recipient_phone or 'N/A' }}
+                </p>
+
+                <p>
+                    <strong>Address:</strong>
+                    {{ latest_payment.delivery_address or 'N/A' }}
+                </p>
+
+                <p>
+                    <strong>City:</strong>
+                    {{ latest_payment.delivery_city or 'N/A' }}
+                </p>
+
+                <p>
+                    <strong>Delivery Notes:</strong>
+                    {{ latest_payment.delivery_notes or 'No notes' }}
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- PAYMENT INFORMATION -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Payment Information</h5>
+        </div>
+
+        <div class="card-body">
+
+            {% for payment in payments %}
+
+                <div class="border rounded p-3 mb-3">
+
+                    <h6>
+                        Payment #{{ payment.id }}
+                    </h6>
+
+                    <p>
+                        <strong>Provider:</strong>
+                        {{ payment.provider|upper }}
+                    </p>
+
+                    <p>
+                        <strong>Transaction Reference:</strong>
+                        {{ payment.provider_reference or payment.tx_ref }}
+                    </p>
+
+                    <p>
+                        <strong>Amount:</strong>
+                        {{ payment.amount|currency }}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+
+                        {% if payment.status == 'paid' %}
+                            <span class="badge bg-success">Paid</span>
+                        {% elif payment.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending Verification</span>
+                        {% elif payment.status == 'failed' %}
+                            <span class="badge bg-danger">Failed</span>
+                        {% else %}
+                            <span class="badge bg-secondary">
+                                {{ payment.status|capitalize }}
+                            </span>
+                        {% endif %}
+                    </p>
+
+                    {% if payment.receipt_filename %}
+                        <a href="{{ url_for('payment_receipt', payment_id=payment.id) }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="btn btn-outline-primary btn-sm mb-3">
+                            <i class="fas fa-image"></i>
+                            View Payment Receipt
+                        </a>
+                    {% endif %}
+
+                    {% if payment.status == 'pending'
+                          and payment.provider in ['cbe_birr', 'telebirr'] %}
+
+                        <div class="alert alert-warning">
+                            Verify the actual transaction in the merchant
+                            account before approving this payment.
+                            An uploaded receipt alone is not proof of payment.
+                        </div>
+
+                        <form method="POST"
+                              action="{{ url_for('approve_manual_payment', payment_id=payment.id) }}"
+                              onsubmit="return confirm('Have you independently verified this transaction in the merchant account?');">
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    Administrator Note
+                                </label>
+
+                                <textarea name="admin_note"
+                                          class="form-control"
+                                          rows="2"
+                                          maxlength="2000"
+                                          placeholder="Optional verification note"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                <i class="fas fa-check"></i>
+                                Approve Verified Payment
+                            </button>
+                        </form>
+
+                        <form method="POST"
+                              action="{{ url_for('reject_manual_payment', payment_id=payment.id) }}"
+                              class="mt-2"
+                              onsubmit="return confirm('Are you sure you want to reject this payment?');">
+
+                            <div class="mb-2">
+                                <textarea name="admin_note"
+                                          class="form-control"
+                                          rows="2"
+                                          maxlength="2000"
+                                          placeholder="Reason for rejection"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-danger">
+                                <i class="fas fa-times"></i>
+                                Reject Payment
+                            </button>
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            {% else %}
+
+                <div class="alert alert-info">
+                    No payment records found for this order.
+                </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- ORDER STATUS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Update Order Status</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST"
+                  action="{{ url_for('update_order_status', order_id=order.id) }}">
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Select Order Status
+                    </label>
+
+                    <select name="status" class="form-select" required>
+
+                        <option value="pending"
+                            {% if order.status == 'pending' %}selected{% endif %}>
+                            Pending
+                        </option>
+
+                        <option value="processing"
+                            {% if order.status == 'processing' %}selected{% endif %}>
+                            Processing
+                        </option>
+
+                        <option value="shipped"
+                            {% if order.status == 'shipped' %}selected{% endif %}>
+                            Shipped
+                        </option>
+
+                        <option value="delivered"
+                            {% if order.status == 'delivered' %}selected{% endif %}>
+                            Delivered
+                        </option>
+
+                        <option value="cancelled"
+                            {% if order.status == 'cancelled' %}selected{% endif %}>
+                            Cancelled
+                        </option>
+
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Update Order Status
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

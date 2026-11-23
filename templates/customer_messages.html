@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Messages | ShopNova</title>
+    <style>
+        body{font-family:Arial,sans-serif;background:#f4f6fa;margin:0;color:#172337}
+        .container{max-width:950px;margin:40px auto;padding:20px}
+        .top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+        .card{background:white;padding:20px;margin:14px 0;border-radius:10px;border:1px solid #e5e9ef}
+        a{color:#ea580c;text-decoration:none;font-weight:bold}
+        .status{padding:5px 10px;border-radius:15px;background:#eee;font-size:12px}
+        .message{padding:12px;background:white;margin:10px 0;border-radius:7px}
+        .button{background:#f97316;color:white;padding:11px 16px;border-radius:6px}
+        .muted{color:#778397;font-size:13px}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top">
+        <h1>My Support Messages</h1>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    </div>
+
+    <p>Contact the ShopNova admin and view your conversations.</p>
+
+    <p><a class="button" href="{{ url_for('new_support_conversation') }}">+ New Message</a></p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    {% if conversations %}
+        {% for conversation in conversations %}
+            <div class="card">
+                <h3>{{ conversation.subject }}</h3>
+                <p class="muted">
+                    Conversation #{{ conversation.id }} |
+                    {{ conversation.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                </p>
+                <p>Status: <span class="status">{{ conversation.status|title }}</span></p>
+                <a href="{{ url_for('customer_conversation_detail', conversation_id=conversation.id) }}">
+                    Open Conversation →
+                </a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <h3>No messages yet</h3>
+            <p>You have not contacted the admin.</p>
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>

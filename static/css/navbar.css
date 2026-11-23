@@ -1,0 +1,395 @@
+
+/* =========================================================
+   SHOPNOVA - RESPONSIVE NAVBAR
+   Matches _navbar.html
+========================================================= */
+
+#shopNovaNavbar,
+#shopNovaNavbar * {
+    box-sizing: border-box;
+}
+
+#shopNovaNavbar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid #e8edf4;
+    box-shadow: 0 4px 18px rgba(15, 35, 65, 0.05);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#shopNovaNavbar .nav-container {
+    width: 100%;
+    max-width: 1500px;
+    min-height: 88px;
+    margin: 0 auto;
+    padding: 14px 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 35px;
+}
+
+/* LOGO */
+
+#shopNovaNavbar .logo {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 14px;
+
+    text-decoration: none;
+    color: #14243d;
+}
+
+#shopNovaNavbar .logo-icon {
+    width: 54px;
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ff6b0b;
+    color: #ffffff;
+
+    border-radius: 15px;
+
+    font-size: 30px;
+    font-weight: 900;
+}
+
+#shopNovaNavbar .logo-text {
+    color: #14243d;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+/* NAVIGATION AND ACTIONS WRAPPER */
+
+#shopNovaNavbar .navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 35px;
+    min-width: 0;
+}
+
+/* NAVIGATION LINKS */
+
+#shopNovaNavbar .nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: nowrap;
+}
+
+#shopNovaNavbar .nav-links a {
+    display: inline-flex;
+    align-items: center;
+
+    color: #34445e;
+    text-decoration: none;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+#shopNovaNavbar .nav-links a:hover {
+    color: #ff6b0b;
+}
+
+/* RIGHT SIDE ACTIONS */
+
+#shopNovaNavbar .nav-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+/* CURRENCY SELECTOR */
+
+#shopNovaNavbar .currency-form {
+    margin: 0;
+    padding: 0;
+}
+
+#shopNovaNavbar .currency-form select {
+    min-width: 105px;
+    height: 42px;
+    padding: 0 12px;
+
+    background: #ffffff;
+    color: #26364e;
+
+    border: 1px solid #dce3ed;
+    border-radius: 9px;
+
+    outline: none;
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#shopNovaNavbar .currency-form select:focus {
+    border-color: #ff6b0b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 11, 0.12);
+}
+
+/* CART */
+
+#shopNovaNavbar .cart-link {
+    min-height: 42px;
+    padding: 0 15px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    background: #fff4ec;
+    color: #f36b16;
+
+    border: 1px solid #ffe1cf;
+    border-radius: 9px;
+
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+#shopNovaNavbar .cart-link:hover {
+    background: #ff6b0b;
+    color: #ffffff;
+}
+
+#shopNovaNavbar .cart-count {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 5px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ff6b0b;
+    color: #ffffff;
+
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+#shopNovaNavbar .cart-link:hover .cart-count {
+    background: #ffffff;
+    color: #ff6b0b;
+}
+
+/* LOGOUT */
+
+#shopNovaNavbar .logout-btn {
+    min-height: 42px;
+    padding: 0 17px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    background: #14243d;
+    color: #ffffff;
+
+    border: 1px solid #14243d;
+    border-radius: 9px;
+
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+#shopNovaNavbar .logout-btn:hover {
+    background: #243c60;
+    border-color: #243c60;
+}
+
+/* MOBILE MENU BUTTON */
+
+#shopNovaNavbar .mobile-menu-toggle {
+    display: none;
+
+    width: 44px;
+    height: 44px;
+    padding: 9px;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    background: #fff4ec;
+    border: 1px solid #ffe1cf;
+    border-radius: 9px;
+
+    cursor: pointer;
+}
+
+#shopNovaNavbar .mobile-menu-toggle span {
+    display: block;
+    width: 22px;
+    height: 2.5px;
+
+    background: #f36b16;
+    border-radius: 5px;
+
+    transition: all 0.2s ease;
+}
+
+#shopNovaNavbar .mobile-menu-toggle.active span:nth-child(1) {
+    transform: translateY(8.5px) rotate(45deg);
+}
+
+#shopNovaNavbar .mobile-menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+#shopNovaNavbar .mobile-menu-toggle.active span:nth-child(3) {
+    transform: translateY(-8.5px) rotate(-45deg);
+}
+
+/* =========================================================
+   TABLET AND MOBILE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    #shopNovaNavbar .nav-container {
+        padding: 14px 25px;
+        gap: 20px;
+    }
+
+    #shopNovaNavbar .navbar-content {
+        gap: 20px;
+    }
+
+    #shopNovaNavbar .nav-links {
+        gap: 18px;
+    }
+
+    #shopNovaNavbar .nav-actions {
+        gap: 10px;
+    }
+
+    #shopNovaNavbar .logo-text {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 900px) {
+
+    #shopNovaNavbar .nav-container {
+        min-height: 75px;
+        padding: 12px 20px;
+        flex-wrap: wrap;
+    }
+
+    #shopNovaNavbar .mobile-menu-toggle {
+        display: flex;
+        margin-left: auto;
+    }
+
+    #shopNovaNavbar .navbar-content {
+        display: none;
+        flex: 0 0 100%;
+        width: 100%;
+
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+
+        padding: 20px 0 10px;
+        border-top: 1px solid #edf0f5;
+    }
+
+    #shopNovaNavbar .navbar-content.menu-open {
+        display: flex;
+    }
+
+    #shopNovaNavbar .nav-links {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
+
+    #shopNovaNavbar .nav-links a {
+        width: 100%;
+        padding: 13px 10px;
+        border-radius: 7px;
+    }
+
+    #shopNovaNavbar .nav-links a:hover {
+        background: #fff4ec;
+    }
+
+    #shopNovaNavbar .nav-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    #shopNovaNavbar .currency-form,
+    #shopNovaNavbar .currency-form select,
+    #shopNovaNavbar .cart-link,
+    #shopNovaNavbar .logout-btn {
+        width: 100%;
+    }
+
+    #shopNovaNavbar .currency-form select {
+        height: 44px;
+    }
+
+    #shopNovaNavbar .cart-link,
+    #shopNovaNavbar .logout-btn {
+        min-height: 44px;
+    }
+}
+
+/* SMALL MOBILE */
+
+@media (max-width: 480px) {
+
+    #shopNovaNavbar .nav-container {
+        padding: 10px 15px;
+    }
+
+    #shopNovaNavbar .logo-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 25px;
+        border-radius: 12px;
+    }
+
+    #shopNovaNavbar .logo-text {
+        font-size: 23px;
+    }
+}

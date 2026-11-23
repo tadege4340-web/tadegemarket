@@ -1,0 +1,13 @@
+
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+instance/
+.pytest_cache/
+private_uploads/
+.DS_Store
+Thumbs.db

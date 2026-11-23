@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Conversation | ShopNova</title>
+    <style>
+        body{font-family:Arial,sans-serif;background:#f4f6fa;margin:0;color:#172337}
+        .container{max-width:850px;margin:35px auto;padding:20px}
+        .panel{background:white;padding:22px;border-radius:12px}
+        .chat{padding:14px;margin:14px 0;border-radius:10px;max-width:75%;white-space:pre-wrap;overflow-wrap:anywhere}
+        .mine{background:#fff0e5;margin-left:auto}
+        .theirs{background:#e8eef7;margin-right:auto}
+        .muted{font-size:12px;color:#778397}
+        textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dce1e8;border-radius:7px;min-height:100px}
+        button{background:#f97316;color:white;border:0;padding:12px 18px;border-radius:7px;cursor:pointer}
+        a{color:#ea580c;text-decoration:none}
+        .notice{padding:12px;background:#fef3c7;border-radius:7px}
+    </style>
+</head>
+<body>
+<div class="container">
+    <p><a href="{{ url_for('customer_messages') }}">← My Messages</a></p>
+
+    <div class="panel">
+        <h2>{{ conversation.subject }}</h2>
+        <p class="muted">
+            Conversation #{{ conversation.id }} |
+            Status: {{ conversation.status|title }}
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        {% for item in messages %}
+            <div class="chat {{ 'mine' if item.sender_id == session.get('user_id') else 'theirs' }}">
+                <strong>
+                    {{ 'You' if item.sender_id == session.get('user_id') else 'ShopNova Admin' }}
+                </strong>
+                <p>{{ item.message }}</p>
+                <div class="muted">{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+            </div>
+        {% endfor %}
+
+        {% if conversation.status == 'closed' %}
+            <div class="notice">This conversation is closed. Create a new message if you need more help.</div>
+        {% else %}
+            <form method="POST">
+                <label for="message"><strong>Write a reply</strong></label>
+                <textarea id="message" name="message" maxlength="5000"
+                          placeholder="Type your message..." required></textarea>
+                <p><button type="submit">Send Reply</button></p>
+            </form>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

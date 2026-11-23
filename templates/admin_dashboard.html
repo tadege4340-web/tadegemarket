@@ -1,0 +1,1279 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ShopNova | Admin Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .notification-badge {
+            background-color: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 9999px;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+            margin-left: auto;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+        }
+
+        .page-loading {
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #64748b;
+        }
+
+        .page-loading i {
+            font-size: 35px;
+            margin-bottom: 15px;
+            color: #f97316;
+        }
+
+        .ajax-error {
+            margin: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            background: #fff1f2;
+            color: #991b1b;
+        }
+
+        .ajax-success-message {
+            margin: 15px 0;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="adminSidebar">
+
+        <div class="sidebar-brand">
+            <h2 style="color:#ffffff;font-weight:800;font-size:26px;">
+                Shop<span style="color:#f97316;">Nova.</span>
+            </h2>
+
+            <p style="color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:4px;">
+                Admin Panel
+            </p>
+        </div>
+
+        <nav class="sidebar-menu">
+
+            <a href="{{ url_for('admin_dashboard') }}"
+               data-admin-page
+               data-title="Dashboard"
+               data-subtitle="Overview of your ShopNova store">
+
+                <i class="fas fa-gauge-high"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('admin_products') }}"
+               data-admin-page
+               data-title="Product Management"
+               data-subtitle="View and manage your products">
+
+                <i class="fas fa-box"></i>
+                <span>Product Management</span>
+            </a>
+
+            <a href="{{ url_for('add_product') }}"
+               data-admin-page
+               data-title="Add New Product"
+               data-subtitle="Add a new product to your store">
+
+                <i class="fas fa-plus-circle"></i>
+                <span>Add New Product</span>
+            </a>
+
+            <a href="{{ url_for('admin_orders') }}"
+               data-admin-page
+               data-title="Manage Orders"
+               data-subtitle="View and process customer orders">
+
+                <i class="fas fa-shopping-cart"></i>
+                <span>Manage Orders</span>
+            </a>
+
+            <a href="{{ url_for('admin_payments') }}"
+               data-admin-page
+               data-title="Payment Management"
+               data-subtitle="Review and verify customer payments">
+
+                <i class="fas fa-money-bill-transfer"></i>
+                <span>Payment Management</span>
+
+                <span id="sidebar-payment-badge"
+                      class="notification-badge"
+                      style="display:none;">0</span>
+            </a>
+
+            <a href="{{ url_for('admin_support') }}"
+               data-admin-page
+               data-title="Customer Messages"
+               data-subtitle="Manage customer support conversations">
+
+                <i class="fas fa-envelope"></i>
+                <span style="margin-left:12px;">Customer Messages</span>
+
+                <span id="sidebar-message-badge"
+                      class="notification-badge"
+                      style="display:{{ 'inline-block' if global_unread_support and global_unread_support > 0 else 'none' }};">
+                    {{ global_unread_support|default(0) }}
+                </span>
+            </a>
+
+            <a href="{{ url_for('logout') }}" class="logout">
+                <i class="fas fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <header class="top-header">
+
+            <div class="d-flex align-items-center">
+
+                <button class="mobile-menu-button"
+                        id="mobileMenuButton"
+                        type="button"
+                        aria-label="Toggle sidebar">
+
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="header-title">
+
+                    <h3 id="admin-page-title">
+
+                        {% if initial_content_template == '_admin_support_conversation.html' %}
+                            Support Conversation
+
+                        {% elif initial_content_template == '_admin_order_details.html' %}
+                            Order Details
+
+                        {% elif initial_content_template == '_admin_products.html' %}
+                            Product Management
+
+                        {% elif initial_content_template == '_add_product.html' %}
+                            Add New Product
+
+                        {% elif initial_content_template == '_admin_payments.html' %}
+                            Payment Management
+
+                        {% else %}
+                            Dashboard
+                        {% endif %}
+
+                    </h3>
+
+                    <p id="admin-page-subtitle">
+
+                        {% if initial_content_template == '_admin_support_conversation.html' %}
+                            Reply to customer
+
+                        {% elif initial_content_template == '_admin_order_details.html' %}
+                            View full order information
+
+                        {% elif initial_content_template == '_admin_products.html' %}
+                            View and manage your products
+
+                        {% elif initial_content_template == '_add_product.html' %}
+                            Add a new product to your store
+
+                        {% elif initial_content_template == '_admin_payments.html' %}
+                            Review and verify customer payments
+
+                        {% else %}
+                            Overview of your ShopNova store
+                        {% endif %}
+
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="admin-profile">
+
+                <div class="admin-avatar">
+                    {{ (session.get('username') or 'A')[0]|upper }}
+                </div>
+
+                <div>
+                    <strong>{{ session.get('username', 'Administrator') }}</strong>
+                    <small>Administrator</small>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- DYNAMIC CONTENT -->
+        <div id="admin-page-content">
+
+            {% if ajax_request|default(false) %}
+
+                <!-- AJAX CONTENT LOADS HERE -->
+
+            {% elif initial_content_template %}
+
+                {% include initial_content_template %}
+
+            {% else %}
+
+                {% include '_admin_dashboard.html' %}
+
+            {% endif %}
+
+        </div>
+
+    </main>
+</div>
+
+<!-- BOOTSTRAP -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- PAYMENT JAVASCRIPT: LOAD ONLY ONCE -->
+<script src="{{ url_for('static', filename='js/admin_payments.js') }}" defer></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    "use strict";
+
+    const content = document.getElementById("admin-page-content");
+    const pageTitle = document.getElementById("admin-page-title");
+    const pageSubtitle = document.getElementById("admin-page-subtitle");
+    const sidebar = document.getElementById("adminSidebar");
+    const mobileMenuButton = document.getElementById("mobileMenuButton");
+
+    let currentController = null;
+
+    // --------------------------------------------------
+    // MOBILE SIDEBAR
+    // --------------------------------------------------
+
+    if (mobileMenuButton && sidebar) {
+        mobileMenuButton.addEventListener("click", function () {
+            sidebar.classList.toggle("show");
+        });
+    }
+
+    // --------------------------------------------------
+    // SAFE HTML ESCAPING
+    // --------------------------------------------------
+
+    function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = String(value ?? "");
+        return div.innerHTML;
+    }
+
+    // --------------------------------------------------
+    // HEADER
+    // --------------------------------------------------
+
+    function updateHeader(title, subtitle) {
+
+        if (title) {
+            pageTitle.textContent = title;
+        }
+
+        if (subtitle) {
+            pageSubtitle.textContent = subtitle;
+        }
+    }
+
+    // --------------------------------------------------
+    // ACTIVE MENU
+    // --------------------------------------------------
+
+    function setActiveMenu(url) {
+
+        const targetPath = new URL(
+            url,
+            window.location.origin
+        ).pathname;
+
+        document.querySelectorAll("a[data-admin-page]").forEach(function (link) {
+
+            link.classList.remove("active");
+
+            const linkPath = new URL(
+                link.href,
+                window.location.origin
+            ).pathname;
+
+            if (linkPath === targetPath) {
+                link.classList.add("active");
+            }
+        });
+    }
+
+    // --------------------------------------------------
+    // LOADING
+    // --------------------------------------------------
+
+    function showLoading() {
+
+        content.innerHTML = `
+            <div class="page-loading">
+
+                <i class="fas fa-spinner fa-spin"></i>
+
+                <h5>Loading page...</h5>
+
+                <p>Please wait.</p>
+
+            </div>
+        `;
+    }
+
+    // --------------------------------------------------
+    // CHART
+    // --------------------------------------------------
+
+    function drawChart() {
+
+        const canvas = document.getElementById("salesChart");
+
+        if (!canvas || typeof Chart === "undefined") {
+            return;
+        }
+
+        const existingChart = Chart.getChart(canvas);
+
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        const ctx = canvas.getContext("2d");
+
+        const gradient = ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            400
+        );
+
+        gradient.addColorStop(
+            0,
+            "rgba(249, 115, 22, 0.2)"
+        );
+
+        gradient.addColorStop(
+            1,
+            "rgba(249, 115, 22, 0)"
+        );
+
+        new Chart(ctx, {
+
+            type: "line",
+
+            data: {
+
+                labels: [
+                    "Mon",
+                    "Tue",
+                    "Wed",
+                    "Thu",
+                    "Fri",
+                    "Sat",
+                    "Sun"
+                ],
+
+                datasets: [{
+
+                    label: "Revenue (ETB)",
+
+                    data: [
+                        12000,
+                        19000,
+                        15000,
+                        25000,
+                        22000,
+                        30000,
+                        35000
+                    ],
+
+                    borderColor: "#f97316",
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+
+                    pointBackgroundColor: "#fff",
+                    pointBorderColor: "#f97316",
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+
+                    fill: true,
+                    tension: 0.4
+
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true,
+
+                        grid: {
+                            borderDash: [2, 4],
+                            color: "#e2e8f0"
+                        }
+                    },
+
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --------------------------------------------------
+    // PRODUCT FORM
+    // --------------------------------------------------
+
+    function initializeProductForm() {
+
+        const form = document.getElementById("productForm");
+
+        if (!form || form.dataset.init === "true") {
+            return;
+        }
+
+        form.dataset.init = "true";
+
+        const imageInput = document.getElementById("image");
+        const imagePreview = document.getElementById("imagePreview");
+        const previewContainer = document.getElementById("previewContainer");
+        const imageName = document.getElementById("imageName");
+        const uploadZone = document.getElementById("uploadZone");
+        const removeBtn = document.getElementById("removeImageBtn");
+        const saveBtn = document.getElementById("saveButton");
+        const messageArea = document.getElementById("addProductMessages");
+        const clearBtn = document.getElementById("clearProductButton");
+
+        // IMAGE PREVIEW
+
+        if (imageInput && imagePreview) {
+
+            imageInput.addEventListener("change", function () {
+
+                const file = this.files && this.files[0];
+
+                if (!file) return;
+
+                const allowedTypes = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+                ];
+
+                if (!allowedTypes.includes(file.type)) {
+
+                    alert("Please select a JPG, PNG, or WEBP image.");
+
+                    this.value = "";
+
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+
+                    alert("Image is too large. Maximum size is 5MB.");
+
+                    this.value = "";
+
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+
+                    imagePreview.src = event.target.result;
+
+                    if (imageName) {
+                        imageName.textContent = file.name;
+                    }
+
+                    if (previewContainer) {
+                        previewContainer.style.display = "block";
+                    }
+
+                    if (uploadZone) {
+                        uploadZone.style.display = "none";
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // REMOVE IMAGE
+
+        if (removeBtn) {
+
+            removeBtn.addEventListener("click", function () {
+
+                if (imageInput) {
+                    imageInput.value = "";
+                }
+
+                if (imagePreview) {
+                    imagePreview.src = "";
+                }
+
+                if (previewContainer) {
+                    previewContainer.style.display = "none";
+                }
+
+                if (uploadZone) {
+                    uploadZone.style.display = "block";
+                }
+
+                if (imageName) {
+                    imageName.textContent = "";
+                }
+            });
+        }
+
+        // CLEAR FORM
+
+        if (clearBtn) {
+
+            clearBtn.addEventListener("click", function () {
+
+                if (messageArea) {
+                    messageArea.textContent = "";
+                }
+
+                setTimeout(function () {
+
+                    if (removeBtn) {
+                        removeBtn.click();
+                    }
+
+                }, 0);
+            });
+        }
+
+        // SUBMIT PRODUCT FORM
+
+        form.addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            if (form.dataset.submitting === "true") {
+                return;
+            }
+
+            form.dataset.submitting = "true";
+
+            const originalButton = saveBtn
+                ? saveBtn.innerHTML
+                : "Save Product";
+
+            if (saveBtn) {
+
+                saveBtn.disabled = true;
+
+                saveBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Saving...
+                `;
+            }
+
+            if (messageArea) {
+                messageArea.textContent = "";
+            }
+
+            try {
+
+                const response = await fetch(form.action, {
+
+                    method: "POST",
+
+                    body: new FormData(form),
+
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    }
+                });
+
+                const data = await readJsonResponse(response);
+
+                if (!response.ok || !data.success) {
+
+                    throw new Error(
+                        data.message || "Unable to save product."
+                    );
+                }
+
+                await loadAdminPage(
+
+                    data.redirect ||
+                    data.redirect_url ||
+                    "/admin/products",
+
+                    "Product Management",
+
+                    "View and manage your products",
+
+                    true
+                );
+
+            } catch (error) {
+
+                if (messageArea) {
+
+                    const alertBox = document.createElement("div");
+
+                    alertBox.className = "alert alert-danger";
+
+                    alertBox.textContent = error.message;
+
+                    messageArea.replaceChildren(alertBox);
+                }
+
+            } finally {
+
+                form.dataset.submitting = "false";
+
+                if (saveBtn) {
+
+                    saveBtn.disabled = false;
+
+                    saveBtn.innerHTML = originalButton;
+                }
+            }
+        });
+    }
+
+    // --------------------------------------------------
+    // INITIALIZE CURRENT PAGE
+    // --------------------------------------------------
+
+    function initializeCurrentPage() {
+
+        initializeProductForm();
+
+        drawChart();
+
+        // Notify other page scripts.
+        document.dispatchEvent(
+            new CustomEvent("admin:page-initialized")
+        );
+    }
+
+    // --------------------------------------------------
+    // JSON RESPONSE
+    // --------------------------------------------------
+
+    async function readJsonResponse(response) {
+
+        const contentType =
+            response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+
+            if (response.redirected) {
+
+                window.location.href = response.url;
+
+                throw new Error("Redirecting...");
+            }
+
+            throw new Error(
+                "The server did not return JSON. Check the Flask route and AJAX response."
+            );
+        }
+
+        return await response.json();
+    }
+
+    // --------------------------------------------------
+    // FORM ERROR
+    // --------------------------------------------------
+
+    function showFormError(form, message) {
+
+        let alertBox = form.querySelector(".ajax-form-error");
+
+        if (!alertBox) {
+
+            alertBox = document.createElement("div");
+
+            alertBox.className =
+                "alert alert-danger ajax-form-error mt-3";
+
+            form.prepend(alertBox);
+        }
+
+        alertBox.textContent = message;
+
+        alertBox.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+        });
+    }
+
+    // --------------------------------------------------
+    // AJAX FORM SUBMISSION
+    // --------------------------------------------------
+
+    async function submitAdminForm(form) {
+
+        if (form.dataset.submitting === "true") {
+            return;
+        }
+
+        form.dataset.submitting = "true";
+
+        const submitButton = form.querySelector(
+            'button[type="submit"], input[type="submit"]'
+        );
+
+        const originalButtonContent = submitButton
+            ? submitButton.innerHTML
+            : null;
+
+        if (submitButton) {
+
+            submitButton.disabled = true;
+
+            if (submitButton.tagName === "BUTTON") {
+
+                submitButton.innerHTML = `
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Processing...
+                `;
+            }
+        }
+
+        try {
+
+            const response = await fetch(
+
+                form.action || window.location.href,
+
+                {
+
+                    method: (form.method || "POST").toUpperCase(),
+
+                    body: new FormData(form),
+
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            const data = await readJsonResponse(response);
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message || "The requested action failed."
+                );
+            }
+
+            const destination =
+                data.redirect ||
+                data.redirect_url ||
+                window.location.pathname + window.location.search;
+
+            await loadAdminPage(
+
+                destination,
+
+                data.title || null,
+
+                data.subtitle || null,
+
+                true
+            );
+
+        } catch (error) {
+
+            form.dataset.submitting = "false";
+
+            if (submitButton) {
+
+                submitButton.disabled = false;
+
+                if (originalButtonContent !== null) {
+                    submitButton.innerHTML = originalButtonContent;
+                }
+            }
+
+            showFormError(form, error.message);
+        }
+    }
+
+    // --------------------------------------------------
+    // AJAX NAVIGATION
+    // --------------------------------------------------
+
+    async function loadAdminPage(
+        url,
+        title,
+        subtitle,
+        pushHistory = true
+    ) {
+
+        if (currentController) {
+            currentController.abort();
+        }
+
+        const controller = new AbortController();
+
+        currentController = controller;
+
+        showLoading();
+
+        try {
+
+            const response = await fetch(url, {
+
+                method: "GET",
+
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "text/html"
+                },
+
+                signal: controller.signal
+            });
+
+            if (response.redirected) {
+
+                window.location.href = response.url;
+
+                return;
+            }
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Unable to load page. HTTP " + response.status
+                );
+            }
+
+            const html = await response.text();
+
+            if (controller !== currentController) {
+                return;
+            }
+
+            // Insert AJAX partial.
+            // Scripts inside this partial are intentionally not relied on.
+            content.innerHTML = html;
+
+            updateHeader(title, subtitle);
+
+            setActiveMenu(url);
+
+            if (pushHistory) {
+
+                history.pushState(
+
+                    {
+                        url: url,
+                        title: title,
+                        subtitle: subtitle
+                    },
+
+                    "",
+
+                    url
+                );
+            }
+
+            if (sidebar) {
+                sidebar.classList.remove("show");
+            }
+
+            initializeCurrentPage();
+
+            document.dispatchEvent(
+                new CustomEvent("admin:page-loaded", {
+                    detail: {
+                        url: url
+                    }
+                })
+            );
+
+        } catch (error) {
+
+            if (error.name === "AbortError") {
+                return;
+            }
+
+            content.innerHTML = `
+
+                <div class="ajax-error">
+
+                    <h5>
+                        <i class="fas fa-triangle-exclamation me-2"></i>
+                        Page Loading Failed
+                    </h5>
+
+                    <p>${escapeHtml(error.message)}</p>
+
+                    <button class="btn btn-danger btn-sm"
+                            type="button"
+                            id="ajaxReloadButton">
+
+                        Reload Page
+
+                    </button>
+
+                </div>
+            `;
+
+        } finally {
+
+            if (controller === currentController) {
+                currentController = null;
+            }
+        }
+    }
+
+    // --------------------------------------------------
+    // RELOAD ERROR BUTTON
+    // --------------------------------------------------
+
+    document.addEventListener("click", function (event) {
+
+        const reloadButton = event.target.closest(
+            "#ajaxReloadButton"
+        );
+
+        if (reloadButton) {
+            window.location.reload();
+        }
+    });
+
+    // --------------------------------------------------
+    // SIDEBAR AJAX NAVIGATION
+    // --------------------------------------------------
+
+    document.addEventListener("click", function (event) {
+
+        const link = event.target.closest(
+            "a[data-admin-page]"
+        );
+
+        if (!link) return;
+
+        if (
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey ||
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        loadAdminPage(
+
+            link.href,
+
+            link.dataset.title,
+
+            link.dataset.subtitle,
+
+            true
+        );
+    });
+
+    // --------------------------------------------------
+    // OTHER ADMIN LINKS
+    // --------------------------------------------------
+
+    document.addEventListener("click", function (event) {
+
+        const link = event.target.closest(
+            "a:not([data-admin-page])"
+        );
+
+        if (!link) return;
+
+        if (!link.pathname.startsWith("/admin/")) {
+            return;
+        }
+
+        if (
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey ||
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        // Do not intercept links opening a new tab.
+        if (link.target === "_blank") {
+            return;
+        }
+
+        event.preventDefault();
+
+        let title = "Admin Panel";
+        let subtitle = "";
+
+        if (link.pathname.includes("/admin/orders/")) {
+
+            title = "Order Details";
+            subtitle = "View order information";
+
+        } else if (link.pathname.includes("/admin/support/")) {
+
+            title = "Support Conversation";
+            subtitle = "Reply to customer";
+
+        } else if (link.pathname.includes("/admin/payments/")) {
+
+            title = "Payment Details";
+            subtitle = "Review customer payment";
+        }
+
+        loadAdminPage(
+            link.href,
+            title,
+            subtitle,
+            true
+        );
+    });
+
+    // --------------------------------------------------
+    // GLOBAL ADMIN FORMS
+    // --------------------------------------------------
+
+    document.addEventListener("submit", function (event) {
+
+        const form = event.target;
+
+        if (!form || !content.contains(form)) {
+            return;
+        }
+
+        // Another handler already handled this submission.
+        if (event.defaultPrevented) {
+            return;
+        }
+
+        // PAYMENT FORMS:
+        // These must use normal browser POST navigation.
+        // Flask can then process the form and redirect normally.
+        if (
+            form.id === "paymentDecisionForm" ||
+            form.matches("[data-payment-native-form]")
+        ) {
+            return;
+        }
+
+        // Product form has its own AJAX handler.
+        if (form.id === "productForm") {
+            return;
+        }
+
+        // Do not intercept forms explicitly marked native.
+        if (form.dataset.nativeForm === "true") {
+            return;
+        }
+
+        const method = (form.method || "GET").toLowerCase();
+
+        if (method === "post") {
+
+            event.preventDefault();
+
+            submitAdminForm(form);
+
+            return;
+        }
+
+        if (method === "get") {
+
+            event.preventDefault();
+
+            const url = new URL(
+                form.action || window.location.href
+            );
+
+            const params = new URLSearchParams(
+                new FormData(form)
+            );
+
+            url.search = params.toString();
+
+            loadAdminPage(
+                url.toString(),
+                null,
+                null,
+                true
+            );
+        }
+    });
+
+    // --------------------------------------------------
+    // BACK AND FORWARD NAVIGATION
+    // --------------------------------------------------
+
+    window.addEventListener("popstate", function (event) {
+
+        if (event.state && event.state.url) {
+
+            loadAdminPage(
+
+                event.state.url,
+
+                event.state.title,
+
+                event.state.subtitle,
+
+                false
+            );
+
+        } else {
+
+            window.location.reload();
+        }
+    });
+
+    // --------------------------------------------------
+    // INITIAL SETUP
+    // --------------------------------------------------
+
+    setActiveMenu(window.location.href);
+
+    initializeCurrentPage();
+
+    // --------------------------------------------------
+    // ADMIN NOTIFICATIONS
+    // --------------------------------------------------
+
+    async function updateNotifications() {
+
+        try {
+
+            const response = await fetch(
+                "/api/admin/notifications",
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+
+            const messageBadge = document.getElementById(
+                "sidebar-message-badge"
+            );
+
+            const paymentBadge = document.getElementById(
+                "sidebar-payment-badge"
+            );
+
+            if (messageBadge) {
+
+                const count = Number(
+                    data.unread_count || 0
+                );
+
+                messageBadge.textContent = count;
+
+                messageBadge.style.display =
+                    count > 0 ? "inline-block" : "none";
+            }
+
+            if (paymentBadge) {
+
+                const count = Number(
+                    data.pending_payments || 0
+                );
+
+                paymentBadge.textContent = count;
+
+                paymentBadge.style.display =
+                    count > 0 ? "inline-block" : "none";
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Notification check failed:",
+                error.message
+            );
+        }
+    }
+
+    updateNotifications();
+
+    // Refresh notification badges every 10 seconds.
+    setInterval(updateNotifications, 10000);
+
+});
+</script>
+
+</body>
+</html>

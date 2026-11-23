@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Orders | ShopNova</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/orders.css') }}">
+</head>
+
+<body>
+
+<header class="navbar">
+    <a href="{{ url_for('home') }}" class="logo">ShopNova</a>
+
+    <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('home') }}">Products</a>
+        <a href="{{ url_for('cart') }}">🛒 Cart</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+</header>
+
+<main class="container">
+
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CUSTOMER ACCOUNT</span>
+            <h1>My Orders</h1>
+            <p>View your purchases and follow their delivery progress.</p>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="shop-button">
+            Continue Shopping →
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="order-summary">
+        <div>
+            <span>Total Orders</span>
+            <strong>{{ orders|length }}</strong>
+        </div>
+
+        <div>
+            <span>Account</span>
+            <strong>Customer</strong>
+        </div>
+    </div>
+
+    {% if orders %}
+
+        <section class="orders-section">
+
+            {% for order in orders %}
+
+                {% set status = (order.status or 'pending')|lower %}
+
+                <article class="order-card">
+
+                    <div class="order-header">
+
+                        <div>
+                            <span class="order-label">ORDER NUMBER</span>
+                            <h3>#{{ order.id }}</h3>
+                        </div>
+
+                        <span class="status status-{{ status }}">
+                            {{ status|capitalize }}
+                        </span>
+
+                    </div>
+
+                    <div class="order-information">
+
+                        <div>
+                            <span>Order Date</span>
+                            <strong>
+                                {{ order.created_at.strftime('%d %b %Y') if order.created_at else 'N/A' }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Products</span>
+                            <strong>{{ order.items|length }}</strong>
+                        </div>
+
+                        <div>
+                            <span>Order Total</span>
+                            <strong class="order-price">
+                                {{ order.total_amount|currency }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <div class="order-footer">
+
+                        <span>
+                            {% if status == 'pending' %}
+                                Your order is waiting for confirmation.
+                            {% elif status == 'processing' %}
+                                Your order is being prepared.
+                            {% elif status == 'shipped' %}
+                                Your order has been shipped.
+                            {% elif status == 'delivered' %}
+                                Your order has been delivered.
+                            {% elif status == 'cancelled' %}
+                                This order has been cancelled.
+                            {% else %}
+                                Check your order for the latest status.
+                            {% endif %}
+                        </span>
+
+                        <a href="{{ url_for('order_details', order_id=order.id) }}"
+                           class="details-button">
+                            View Details →
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </section>
+
+    {% else %}
+
+        <section class="empty-orders">
+
+            <div class="empty-icon">📦</div>
+
+            <h2>No Orders Yet</h2>
+
+            <p>
+                You have not placed any orders.
+                Explore our products and make your first purchase.
+            </p>
+
+            <a href="{{ url_for('home') }}" class="shop-button">
+                Start Shopping →
+            </a>
+
+        </section>
+
+    {% endif %}
+
+</main>
+
+<footer>
+    <p>© 2026 ShopNova. All rights reserved.</p>
+    <p>Discover Quality. Shop Smart.</p>
+</footer>
+
+</body>
+</html>

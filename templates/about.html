@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | ShopNova</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>ShopNova</h2>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}" class="active">About</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>About ShopNova</h1>
+        <p>Your trusted destination for convenient online shopping.</p>
+    </header>
+
+    <main class="container">
+
+        <section class="card">
+            <h2>Who We Are</h2>
+            <p>
+                ShopNova is an online shopping platform designed
+                to make product discovery and shopping easier.
+                Customers can explore products and enjoy a convenient
+                online shopping experience.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>Our Mission</h2>
+            <p>
+                Our mission is to provide a user-friendly shopping
+                experience with accessible product information
+                and convenient online services.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>Our Technologies</h2>
+
+            <div class="technology-grid">
+                <div class="technology-item">
+                    <h3>Python</h3>
+                    <p>Backend programming language.</p>
+                </div>
+
+                <div class="technology-item">
+                    <h3>Flask</h3>
+                    <p>Python web application framework.</p>
+                </div>
+
+                <div class="technology-item">
+                    <h3>PostgreSQL</h3>
+                    <p>Database management system.</p>
+                </div>
+
+                <div class="technology-item">
+                    <h3>HTML</h3>
+                    <p>Structures web pages.</p>
+                </div>
+
+                <div class="technology-item">
+                    <h3>CSS</h3>
+                    <p>Styles and designs the website.</p>
+                </div>
+
+                <div class="technology-item">
+                    <h3>JavaScript</h3>
+                    <p>Adds interactive functionality.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>© 2026 ShopNova. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

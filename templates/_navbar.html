@@ -1,0 +1,452 @@
+
+<header class="navbar" id="shopNovaNavbar">
+
+    <style>
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+            background: #fff;
+        }
+
+        .nav-messages-link,
+        .nav-notification-link {
+            position: relative;
+        }
+
+        .nav-notification-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .nav-notification-link i {
+            font-size: 19px;
+        }
+
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            background: #ef233c;
+            color: #fff;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 2px 5px rgba(239, 35, 60, .3);
+            vertical-align: top;
+            margin-left: 4px;
+            animation: notificationPulse 2s infinite;
+        }
+
+        .nav-badge[hidden] {
+            display: none !important;
+        }
+
+        @keyframes notificationPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.12);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .nav-badge {
+                min-width: 18px;
+                height: 18px;
+                font-size: 10px;
+            }
+        }
+    </style>
+
+    <div class="nav-container">
+
+        <!-- LOGO -->
+        <a href="{{ url_for('dashboard') }}" class="logo">
+
+            <span class="logo-icon">S</span>
+            <span class="logo-text">ShopNova</span>
+
+        </a>
+
+        <!-- MOBILE MENU BUTTON -->
+        <button type="button"
+                class="mobile-menu-toggle"
+                id="mobileMenuToggle"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="navbarContent">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
+        <!-- NAVIGATION CONTENT -->
+        <div class="navbar-content" id="navbarContent">
+
+            <!-- NAVIGATION LINKS -->
+            <nav class="nav-links">
+
+                <a href="{{ url_for('dashboard') }}"
+                   data-spa-link>
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('home') }}"
+                   data-spa-link>
+                    Store
+                </a>
+
+                <!-- CUSTOMER MESSAGES -->
+                <a href="{{ url_for('support') }}"
+                   class="nav-messages-link"
+                   data-spa-link>
+
+                    <i class="fas fa-comments"></i>
+
+                    My Messages
+
+                    <span class="nav-badge"
+                          id="navUnreadMessages"
+                          {% if not unread_messages|default(0, true) %}hidden{% endif %}>
+
+                        {{ unread_messages|default(0, true) }}
+
+                    </span>
+
+                </a>
+
+            </nav>
+
+            <!-- RIGHT SIDE ACTIONS -->
+            <div class="nav-actions">
+
+                <!-- NOTIFICATIONS -->
+                <a href="{{ url_for('dashboard') }}#my-notifications"
+                   class="nav-notification-link"
+                   data-spa-link
+                   aria-label="My notifications">
+
+                    <i class="fas fa-bell"></i>
+
+                    <span>Notifications</span>
+
+                    <span class="nav-badge"
+                          id="navUnreadNotifications"
+                          {% if not unread_notifications|default(0, true) %}hidden{% endif %}>
+
+                        {{ unread_notifications|default(0, true) }}
+
+                    </span>
+
+                </a>
+
+                <!-- CURRENCY SELECTOR -->
+                <form method="POST"
+                      action="{{ url_for('set_currency') }}"
+                      class="currency-form">
+
+                    <input type="hidden"
+                           name="next"
+                           value="{{ request.path }}">
+
+                    <select name="currency"
+                            onchange="this.form.submit()"
+                            aria-label="Select currency">
+
+                        {% for code, info in currency_options.items() %}
+
+                            <option value="{{ code }}"
+                                {% if current_currency == code %}selected{% endif %}>
+
+                                {{ info.flag }} {{ code }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </form>
+
+                <!-- SHOPPING CART -->
+                <a href="{{ url_for('cart') }}"
+                   class="cart-link"
+                   data-spa-link>
+
+                    <i class="fas fa-shopping-cart"></i>
+
+                    <span>Cart</span>
+
+                    <span class="cart-count">
+                        {{ cart_count|default(0) }}
+                    </span>
+
+                </a>
+
+                <!-- LOGOUT -->
+                <a href="{{ url_for('logout') }}"
+                   class="logout-btn">
+
+                    <i class="fas fa-sign-out-alt"></i>
+
+                    Logout
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<script>
+(function () {
+
+    "use strict";
+
+    // Prevent duplicate initialization.
+    if (window.shopNovaNavbarInitialized) {
+        return;
+    }
+
+    window.shopNovaNavbarInitialized = true;
+
+    const navbar = document.getElementById("shopNovaNavbar");
+    const toggle = document.getElementById("mobileMenuToggle");
+    const content = document.getElementById("navbarContent");
+
+    // ==========================================
+    // MOBILE MENU
+    // ==========================================
+
+    function closeMenu() {
+
+        if (!toggle || !content) {
+            return;
+        }
+
+        content.classList.remove("menu-open");
+        toggle.classList.remove("active");
+
+        toggle.setAttribute("aria-expanded", "false");
+
+        toggle.setAttribute(
+            "aria-label",
+            "Open navigation menu"
+        );
+
+    }
+
+    if (toggle && content) {
+
+        toggle.addEventListener("click", function () {
+
+            const isOpen = content.classList.toggle("menu-open");
+
+            toggle.classList.toggle("active", isOpen);
+
+            toggle.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+            toggle.setAttribute(
+                "aria-label",
+                isOpen
+                    ? "Close navigation menu"
+                    : "Open navigation menu"
+            );
+
+        });
+
+        // Close menu when a navigation link is clicked.
+        content.addEventListener("click", function (event) {
+
+            const link = event.target.closest("a");
+
+            if (link) {
+                closeMenu();
+            }
+
+        });
+
+        // Close menu when clicking outside.
+        document.addEventListener("click", function (event) {
+
+            if (navbar && !navbar.contains(event.target)) {
+                closeMenu();
+            }
+
+        });
+
+        // Close menu when returning to desktop width.
+        window.addEventListener("resize", function () {
+
+            if (window.innerWidth > 900) {
+                closeMenu();
+            }
+
+        });
+
+    }
+
+    // ==========================================
+    // UPDATE NAVBAR BADGES
+    // ==========================================
+
+    async function updateNavbarBadges() {
+
+        try {
+
+            const response = await fetch(
+                "{{ url_for('unread_counts') }}",
+                {
+                    method: "GET",
+
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+
+            // ----------------------------------
+            // UNREAD MESSAGE COUNT
+            // ----------------------------------
+
+            const messageBadge = document.getElementById(
+                "navUnreadMessages"
+            );
+
+            if (messageBadge) {
+
+                const messageCount = Math.max(
+                    0,
+                    Number(data.unread_messages || 0)
+                );
+
+                messageBadge.textContent =
+                    messageCount > 99 ? "99+" : messageCount;
+
+                messageBadge.hidden = messageCount === 0;
+
+            }
+
+            // ----------------------------------
+            // UNREAD NOTIFICATION COUNT
+            // ----------------------------------
+
+            const notificationBadge = document.getElementById(
+                "navUnreadNotifications"
+            );
+
+            if (notificationBadge) {
+
+                const notificationCount = Math.max(
+                    0,
+                    Number(data.unread_notifications || 0)
+                );
+
+                notificationBadge.textContent =
+                    notificationCount > 99
+                        ? "99+"
+                        : notificationCount;
+
+                notificationBadge.hidden =
+                    notificationCount === 0;
+
+            }
+
+            // ----------------------------------
+            // DASHBOARD NOTIFICATION BADGE
+            // ----------------------------------
+
+            const dashboardBadge = document.getElementById(
+                "dashboardUnreadNotifications"
+            );
+
+            if (dashboardBadge) {
+
+                dashboardBadge.textContent =
+                    data.unread_notifications || 0;
+
+                dashboardBadge.style.display =
+                    Number(data.unread_notifications || 0) > 0
+                        ? "inline-block"
+                        : "none";
+
+            }
+
+            // ----------------------------------
+            // MARK ALL AS READ BUTTON
+            // ----------------------------------
+
+            const markAllButton = document.getElementById(
+                "markAllNotificationsRead"
+            );
+
+            if (markAllButton) {
+
+                markAllButton.disabled =
+                    Number(data.unread_notifications || 0) === 0;
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "ShopNova badge update failed:",
+                error
+            );
+
+        }
+
+    }
+
+    // Initial badge update.
+    updateNavbarBadges();
+
+    // Refresh badge counts every 20 seconds.
+    const badgeInterval = window.setInterval(
+        updateNavbarBadges,
+        20000
+    );
+
+    // Allow dashboard scripts to refresh badges.
+    window.updateShopNovaBadges = updateNavbarBadges;
+
+    // Clean up interval when leaving the page.
+    window.addEventListener("pagehide", function () {
+
+        window.clearInterval(badgeInterval);
+
+    });
+
+})();
+</script>

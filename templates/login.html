@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | ShopNova</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .login-page {
+            min-height: 75vh;
+            display: grid;
+            place-items: center;
+            padding: 40px 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            background: white;
+            border: 1px solid #e9eaf0;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(30, 35, 70, 0.08);
+            box-sizing: border-box;
+        }
+
+        .login-card h1 {
+            font-size: 28px;
+            margin: 12px 0;
+            color: #142d47;
+        }
+
+        .login-card > p {
+            color: #81899a;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .login-card label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin: 15px 0 7px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #e9eaf0;
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .login-card input:focus {
+            border-color: #6254e7;
+            box-shadow: 0 0 0 3px rgba(98, 84, 231, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 48px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 19px;
+            padding: 5px;
+        }
+
+        .login-submit {
+            width: 100%;
+            margin-top: 25px;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            background: #6254e7;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s ease;
+        }
+
+        .login-submit:hover {
+            background: #493bc7;
+        }
+
+        .back-home,
+        .register-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #6254e7;
+            font-size: 13px;
+        }
+
+        .register-link {
+            color: #555;
+        }
+
+        .register-link a {
+            color: #6254e7;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .message.error,
+        .message.danger {
+            background: #ffe6e6;
+            color: #b42318;
+        }
+
+        .message.success {
+            background: #e3f8e9;
+            color: #16743b;
+        }
+
+        .message.warning {
+            background: #fff4d6;
+            color: #8a5a00;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 28px 20px;
+            }
+
+            .login-card h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a href="{{ url_for('home') }}" class="logo">
+            Shop<span>Nova</span><small>.</small>
+        </a>
+
+        <a href="{{ url_for('home') }}" class="login-button">
+            Back to Home
+        </a>
+    </header>
+
+    <main class="login-page">
+
+        <div class="login-card">
+
+            <span class="section-label">WELCOME BACK</span>
+
+            <h1>Login to ShopNova</h1>
+
+            <p>Enter your account information to continue.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST">
+
+                <label for="email">Email or Username</label>
+
+                <input
+                    type="text"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email or username"
+                    autocomplete="username"
+                    maxlength="150"
+                    required
+                    autofocus>
+
+                <label for="password">Password</label>
+
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required>
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        onclick="togglePassword()"
+                        aria-label="Show password"
+                        id="toggleButton">
+
+                        <span id="eyeIcon">👁</span>
+
+                    </button>
+
+                </div>
+
+                <button type="submit" class="login-submit">
+                    Login
+                </button>
+
+            </form>
+
+            <p class="register-link">
+                Don't have an account?
+                <a href="{{ url_for('register') }}">Create Account</a>
+            </p>
+
+            <a href="{{ url_for('home') }}" class="back-home">
+                ← Return to homepage
+            </a>
+
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <div class="footer-bottom">
+            <p>© 2026 ShopNova. All rights reserved.</p>
+            <p>Built with Python Flask.</p>
+        </div>
+    </footer>
+
+    <script>
+        function togglePassword() {
+            const password = document.getElementById("password");
+            const eyeIcon = document.getElementById("eyeIcon");
+            const toggleButton = document.getElementById("toggleButton");
+
+            if (password.type === "password") {
+                password.type = "text";
+                eyeIcon.textContent = "🙈";
+                toggleButton.setAttribute("aria-label", "Hide password");
+            } else {
+                password.type = "password";
+                eyeIcon.textContent = "👁";
+                toggleButton.setAttribute("aria-label", "Show password");
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,345 @@
+
+<style>
+#shopnova-product-editor {
+    --sn-primary: #2457d6;
+    --sn-dark: #172b4d;
+    --sn-muted: #77849a;
+    --sn-border: #e8edf4;
+    --sn-bg: #f6f8fc;
+    color: var(--sn-dark);
+    font-family: Inter, "Segoe UI", sans-serif;
+}
+#shopnova-product-editor * { box-sizing: border-box; }
+#shopnova-product-editor .editor-heading {
+    display:flex; justify-content:space-between; align-items:center;
+    gap:18px; flex-wrap:wrap; margin-bottom:26px;
+}
+#shopnova-product-editor .eyebrow {
+    color:var(--sn-primary); font-size:11px; font-weight:800;
+    letter-spacing:1.5px; text-transform:uppercase; margin-bottom:9px;
+}
+#shopnova-product-editor h2 {
+    color:var(--sn-dark); font-size:27px; font-weight:800; margin:0 0 7px;
+}
+#shopnova-product-editor .heading-description {
+    color:var(--sn-muted); font-size:13px; margin:0;
+}
+#shopnova-product-editor .editor-back,
+#shopnova-product-editor .cancel-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    gap:9px; padding:11px 16px; border:1px solid var(--sn-border);
+    background:white; border-radius:9px; color:#40516a;
+    text-decoration:none; font-size:12px; font-weight:700;
+}
+#shopnova-product-editor .editor-grid {
+    display:grid; grid-template-columns:minmax(0,1fr) 340px;
+    gap:22px; align-items:start;
+}
+#shopnova-product-editor .editor-card {
+    background:white; border:1px solid var(--sn-border);
+    border-radius:15px; padding:24px; margin-bottom:20px;
+    box-shadow:0 5px 22px rgba(25,45,80,.035);
+}
+#shopnova-product-editor .card-heading {
+    display:flex; align-items:flex-start; gap:13px; margin-bottom:23px;
+}
+#shopnova-product-editor .card-icon {
+    width:41px; height:41px; flex-shrink:0; display:grid;
+    place-items:center; border-radius:11px;
+    background:#edf3ff; color:var(--sn-primary); font-size:16px;
+}
+#shopnova-product-editor .card-heading h3 {
+    font-size:15px; font-weight:800; margin:2px 0 5px;
+}
+#shopnova-product-editor .card-heading p {
+    color:var(--sn-muted); font-size:11px; margin:0;
+}
+#shopnova-product-editor .field { margin-bottom:19px; }
+#shopnova-product-editor .field:last-child { margin-bottom:0; }
+#shopnova-product-editor label {
+    display:block; font-size:12px; font-weight:750;
+    color:#34445e; margin-bottom:8px;
+}
+#shopnova-product-editor .required { color:#e05265; }
+#shopnova-product-editor .form-control,
+#shopnova-product-editor .form-select {
+    width:100%; min-height:45px; padding:11px 13px;
+    border:1px solid #dfe5ef; border-radius:9px;
+    background:#fff; color:#24344d; font-size:13px;
+    outline:none; box-shadow:none; transition:.2s;
+}
+#shopnova-product-editor textarea.form-control {
+    min-height:125px; resize:vertical;
+}
+#shopnova-product-editor .form-control:focus,
+#shopnova-product-editor .form-select:focus {
+    border-color:var(--sn-primary);
+    box-shadow:0 0 0 3px rgba(36,87,214,.09);
+}
+#shopnova-product-editor .field-help {
+    color:var(--sn-muted); font-size:10px; margin-top:7px;
+}
+#shopnova-product-editor .field-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:15px;
+}
+#shopnova-product-editor .upload-area {
+    border:2px dashed #cbd7e9; background:#f9fbff;
+    border-radius:13px; min-height:205px; display:flex;
+    flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:22px; cursor:pointer; transition:.2s;
+}
+#shopnova-product-editor .upload-area:hover {
+    border-color:var(--sn-primary); background:#f1f5ff;
+}
+#shopnova-product-editor .upload-symbol {
+    width:55px; height:55px; display:grid; place-items:center;
+    border-radius:15px; background:#e9efff; color:var(--sn-primary);
+    font-size:22px; margin-bottom:13px;
+}
+#shopnova-product-editor .upload-area strong {
+    font-size:13px; margin-bottom:7px;
+}
+#shopnova-product-editor .upload-area span {
+    color:var(--sn-muted); font-size:10px;
+}
+#shopnova-product-editor .preview-container {
+    display:none; border:1px solid var(--sn-border);
+    border-radius:12px; padding:10px; margin-top:14px; background:white;
+}
+#shopnova-product-editor .preview-container img {
+    width:100%; height:210px; object-fit:contain;
+    border-radius:8px; background:var(--sn-bg);
+}
+#shopnova-product-editor .preview-info {
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px; margin-top:10px; font-size:11px;
+    color:var(--sn-muted); overflow-wrap:anywhere;
+}
+#shopnova-product-editor .remove-image {
+    border:0; background:#fff0f1; color:#d64255;
+    border-radius:7px; padding:7px 10px; font-size:10px;
+    font-weight:700; cursor:pointer;
+}
+#shopnova-product-editor .publishing-note {
+    padding:15px; border-radius:10px; background:#eff8f4;
+    border:1px solid #d8eee2; color:#397355;
+    font-size:11px; line-height:1.7;
+}
+#shopnova-product-editor .editor-actions {
+    display:flex; justify-content:flex-end; gap:11px; margin:8px 0 35px;
+}
+#shopnova-product-editor .save-btn {
+    min-height:44px; display:inline-flex; align-items:center;
+    justify-content:center; gap:9px; padding:0 20px;
+    border-radius:9px; font-size:12px; font-weight:750;
+    cursor:pointer; border:1px solid var(--sn-primary);
+    background:var(--sn-primary); color:white; transition:.2s;
+}
+#shopnova-product-editor .save-btn:hover { background:#1947b8; }
+#shopnova-product-editor .save-btn:disabled {
+    opacity:.65; cursor:not-allowed;
+}
+#shopnova-product-editor .form-message {
+    display:none; padding:12px 15px; border-radius:9px;
+    margin-bottom:18px; font-size:12px;
+}
+#shopnova-product-editor .form-message.error {
+    display:block; background:#fff0f1; color:#bd3448;
+    border:1px solid #f4d3d8;
+}
+#shopnova-product-editor .form-message.success {
+    display:block; background:#eff8f4; color:#28734c;
+    border:1px solid #d8eee2;
+}
+@media(max-width:1000px) {
+    #shopnova-product-editor .editor-grid { grid-template-columns:1fr; }
+}
+@media(max-width:600px) {
+    #shopnova-product-editor h2 { font-size:22px; }
+    #shopnova-product-editor .editor-card { padding:17px; }
+    #shopnova-product-editor .field-row { grid-template-columns:1fr; gap:0; }
+    #shopnova-product-editor .editor-actions { flex-direction:column-reverse; }
+    #shopnova-product-editor .editor-actions a,
+    #shopnova-product-editor .editor-actions button { width:100%; }
+}
+</style>
+
+<div id="shopnova-product-editor">
+    <div class="editor-heading">
+        <div>
+            <div class="eyebrow">Product Management / Create</div>
+            <h2>Add New Product</h2>
+            <p class="heading-description">Add a new item to your ShopNova inventory.</p>
+        </div>
+
+        <a href="{{ url_for('admin_products') }}"
+           class="editor-back"
+           data-admin-page
+           data-title="Product Management"
+           data-subtitle="Manage your ShopNova products">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Products
+        </a>
+    </div>
+
+    <div id="addProductMessages" class="form-message" role="alert"></div>
+
+    <form method="POST"
+          action="{{ url_for('add_product') }}"
+          enctype="multipart/form-data"
+          id="productForm">
+
+        <div class="editor-grid">
+            <div>
+                <section class="editor-card">
+                    <div class="card-heading">
+                        <div class="card-icon"><i class="fa-solid fa-box"></i></div>
+                        <div>
+                            <h3>Basic Information</h3>
+                            <p>Enter the main information about your product.</p>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="productName">Product Name <span class="required">*</span></label>
+                        <input id="productName" type="text" name="name"
+                               class="form-control"
+                               placeholder="e.g. Premium Wireless Headphones"
+                               maxlength="150" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="productDescription">Product Description</label>
+                        <textarea id="productDescription" name="description"
+                                  class="form-control"
+                                  placeholder="Write a clear description of your product..."></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="productCategory">Product Category</label>
+                        <select id="productCategory" name="category_id" class="form-select">
+                            <option value="">Choose a category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if not categories %}
+                        <div class="field-help">No categories are available yet. Create a category first.</div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section class="editor-card">
+                    <div class="card-heading">
+                        <div class="card-icon"><i class="fa-solid fa-wallet"></i></div>
+                        <div>
+                            <h3>Pricing & Inventory</h3>
+                            <p>Set your selling price and available quantity.</p>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="productPrice">Selling Price (ETB) <span class="required">*</span></label>
+                            <input id="productPrice" type="number" name="price"
+                                   class="form-control" min="0.01" step="0.01"
+                                   placeholder="0.00" required>
+                        </div>
+                        <div class="field">
+                            <label for="productStock">Stock Quantity <span class="required">*</span></label>
+                            <input id="productStock" type="number" name="stock"
+                                   class="form-control" min="0" step="1"
+                                   value="0" required>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="editor-card">
+                    <div class="card-heading">
+                        <div class="card-icon"><i class="fa-solid fa-tags"></i></div>
+                        <div>
+                            <h3>Product Details</h3>
+                            <p>Organize and identify your product.</p>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="productTag">Product Tag</label>
+                            <input id="productTag" type="text" name="tag"
+                                   class="form-control" placeholder="e.g. New Arrival"
+                                   maxlength="50">
+                        </div>
+                        <div class="field">
+                            <label for="productIcon">Product Icon</label>
+                            <input id="productIcon" type="text" name="icon"
+                                   class="form-control" value="📦" maxlength="50">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div>
+                <section class="editor-card">
+                    <div class="card-heading">
+                        <div class="card-icon"><i class="fa-solid fa-image"></i></div>
+                        <div>
+                            <h3>Product Media</h3>
+                            <p>Upload a clear product image.</p>
+                        </div>
+                    </div>
+
+                    <label for="image">Product Image</label>
+                    <label for="image" class="upload-area">
+                        <div class="upload-symbol"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <strong>Click to upload an image</strong>
+                        <span>PNG, JPG, JPEG or WEBP</span>
+                        <span>Maximum file size: 5 MB</span>
+                    </label>
+
+                    <input type="file" name="image" id="image"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                           hidden>
+
+                    <div class="preview-container" id="previewContainer">
+                        <img id="imagePreview" alt="Product preview">
+                        <div class="preview-info">
+                            <span id="imageName"></span>
+                            <button type="button" class="remove-image" id="removeImage">
+                                <i class="fa-solid fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="editor-card">
+                    <div class="card-heading">
+                        <div class="card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div>
+                            <h3>Publishing</h3>
+                            <p>Store visibility information.</p>
+                        </div>
+                    </div>
+                    <div class="publishing-note">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Your product will be saved using your existing Flask product creation process.
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="editor-actions">
+            <a href="{{ url_for('admin_products') }}"
+               class="cancel-btn"
+               data-admin-page
+               data-title="Product Management"
+               data-subtitle="Manage your ShopNova products">
+                Cancel
+            </a>
+
+            <button type="submit" class="save-btn" id="saveButton">
+                <i class="fa-solid fa-plus"></i> Save Product
+            </button>
+        </div>
+    </form>
+</div>

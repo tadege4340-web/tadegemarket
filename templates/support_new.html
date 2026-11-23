@@ -1,0 +1,898 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>New Conversation | ShopNova</title>
+
+    <style>
+        :root {
+            --primary: #17365d;
+            --primary-light: #244d7e;
+            --accent: #3b82f6;
+            --background: #f4f7fb;
+            --white: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --shadow: 0 12px 35px rgba(15, 23, 42, 0.07);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* HEADER */
+
+        .navbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            min-height: 76px;
+            margin: auto;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            color: var(--primary);
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .logo-icon {
+            width: 39px;
+            height: 39px;
+            display: grid;
+            place-items: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 11px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 27px;
+        }
+
+        .nav-links a {
+            color: #475569;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-link {
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .logout-btn {
+            background: #f1f5f9;
+            color: var(--primary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* MAIN */
+
+        .page-container {
+            max-width: 1100px;
+            margin: 35px auto 60px;
+            padding: 0 22px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .breadcrumb a {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* PAGE HEADING */
+
+        .page-heading {
+            margin-bottom: 28px;
+        }
+
+        .heading-label {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 13px;
+        }
+
+        .page-heading h1 {
+            color: var(--primary);
+            font-size: clamp(27px, 4vw, 36px);
+            margin-bottom: 10px;
+        }
+
+        .page-heading p {
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 15px;
+            max-width: 650px;
+        }
+
+        /* LAYOUT */
+
+        .support-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 25px;
+            align-items: start;
+        }
+
+        /* FORM CARD */
+
+        .form-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            background: #eff6ff;
+            color: var(--accent);
+            border-radius: 13px;
+            font-size: 23px;
+        }
+
+        .form-card-header h2 {
+            color: var(--primary);
+            font-size: 19px;
+            margin-bottom: 5px;
+        }
+
+        .form-card-header p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .form-body {
+            padding: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 23px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #334155;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        .form-control {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            padding: 14px 15px;
+            background: #ffffff;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.10);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        textarea.form-control {
+            min-height: 190px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+
+        .field-help {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .message-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .privacy-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            border-radius: 9px;
+            padding: 13px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 23px;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-card h3 {
+            color: var(--primary);
+            font-size: 17px;
+            margin-bottom: 18px;
+        }
+
+        .support-intro {
+            background: linear-gradient(135deg, #17365d, #2563eb);
+            color: white;
+            border: none;
+            padding: 25px;
+        }
+
+        .support-intro .support-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            background: rgba(255,255,255,0.15);
+            font-size: 24px;
+            margin-bottom: 17px;
+        }
+
+        .support-intro h3 {
+            color: white;
+            font-size: 19px;
+            margin-bottom: 10px;
+        }
+
+        .support-intro p {
+            color: #dbeafe;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 19px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-icon {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            background: #eff6ff;
+            font-size: 17px;
+        }
+
+        .info-item strong {
+            display: block;
+            color: #334155;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .info-item p {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .inbox-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-radius: 9px;
+            padding: 13px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 18px;
+        }
+
+        .inbox-link:hover {
+            background: #dbeafe;
+        }
+
+        /* FLASH MESSAGES */
+
+        .alert {
+            padding: 14px 17px;
+            border-radius: 9px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .alert-danger,
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* FOOTER */
+
+        .footer {
+            background: #142d47;
+            color: white;
+            padding: 27px 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            color: #cbd5e1;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 900px) {
+            .support-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .nav-container {
+                padding: 15px 18px;
+                flex-wrap: wrap;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                overflow-x: auto;
+                gap: 20px;
+                padding: 10px 0;
+            }
+
+            .nav-actions {
+                margin-left: auto;
+            }
+
+            .page-container {
+                margin-top: 25px;
+                padding: 0 15px;
+            }
+
+            .form-card-header,
+            .form-body {
+                padding: 20px;
+            }
+
+            .sidebar {
+                display: flex;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .message-footer {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header class="navbar">
+
+    <div class="nav-container">
+
+        <a href="{{ url_for('home') }}" class="logo">
+            <span class="logo-icon">S</span>
+            ShopNova
+        </a>
+
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('home') }}#products">Products</a>
+            <a href="{{ url_for('support_list') }}">My Messages</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+        </nav>
+
+        <div class="nav-actions">
+            <a href="{{ url_for('dashboard') }}" class="dashboard-link">
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                Logout
+            </a>
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- MAIN CONTENT -->
+
+<main class="page-container">
+
+    <!-- BREADCRUMB -->
+
+    <div class="breadcrumb">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <span>›</span>
+        <a href="{{ url_for('support_list') }}">My Messages</a>
+        <span>›</span>
+        <span>New Conversation</span>
+    </div>
+
+
+    <!-- PAGE HEADING -->
+
+    <section class="page-heading">
+
+        <span class="heading-label">
+            SHOPNOVA CUSTOMER SUPPORT
+        </span>
+
+        <h1>Start a Conversation</h1>
+
+        <p>
+            Have a question or need assistance? Send a message
+            to our support team. We are here to help you with
+            your shopping experience.
+        </p>
+
+    </section>
+
+
+    <!-- FLASH MESSAGES -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% for category, message in messages %}
+
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endwith %}
+
+
+    <!-- SUPPORT LAYOUT -->
+
+    <section class="support-layout">
+
+        <!-- MESSAGE FORM -->
+
+        <div class="form-card">
+
+            <div class="form-card-header">
+
+                <div class="form-icon">✉️</div>
+
+                <div>
+                    <h2>Compose Your Message</h2>
+                    <p>Fill in the information below to contact our team.</p>
+                </div>
+
+            </div>
+
+
+            <div class="form-body">
+
+                <form method="POST"
+                      action="{{ url_for('support_new') }}">
+
+                    <!-- SUBJECT -->
+
+                    <div class="form-group">
+
+                        <label for="subject">
+                            Conversation Subject
+                            <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="subject"
+                            name="subject"
+                            class="form-control"
+                            placeholder="Example: Question about my order"
+                            maxlength="150"
+                            required
+                            autocomplete="off">
+
+                        <p class="field-help">
+                            Write a short title that explains what you need help with.
+                        </p>
+
+                    </div>
+
+
+                    <!-- MESSAGE -->
+
+                    <div class="form-group">
+
+                        <label for="message">
+                            Your Message
+                            <span class="required">*</span>
+                        </label>
+
+                        <textarea
+                            id="message"
+                            name="message"
+                            class="form-control"
+                            placeholder="Hello ShopNova Support Team,
+
+I need assistance with...
+
+Please help me with this issue.
+
+Thank you."
+                            minlength="5"
+                            maxlength="5000"
+                            required></textarea>
+
+                        <p class="field-help">
+                            Please explain your question or issue clearly.
+                        </p>
+
+                    </div>
+
+
+                    <!-- FOOTER -->
+
+                    <div class="message-footer">
+
+                        <div class="privacy-note">
+                            🔒 Your conversation is private to your account and support team.
+                        </div>
+
+                        <div>
+                            <span id="characterCount"
+                                  style="font-size:12px;color:#64748b;">
+                                0 / 5000 characters
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- BUTTONS -->
+
+                    <div class="form-actions">
+
+                        <a href="{{ url_for('support_list') }}"
+                           class="btn btn-cancel">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-submit">
+                            ✉ Send Message
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUPPORT INFORMATION -->
+
+        <aside class="sidebar">
+
+            <div class="sidebar-card support-intro">
+
+                <div class="support-icon">
+                    💬
+                </div>
+
+                <h3>We're Here to Help!</h3>
+
+                <p>
+                    Our ShopNova support team is ready to assist
+                    you. Send your message and check your inbox
+                    for our response.
+                </p>
+
+            </div>
+
+
+            <div class="sidebar-card">
+
+                <h3>Helpful Information</h3>
+
+                <div class="info-item">
+
+                    <div class="info-icon">📝</div>
+
+                    <div>
+                        <strong>Be Specific</strong>
+                        <p>
+                            Explain your issue clearly so our team
+                            can understand your request.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <div class="info-icon">📬</div>
+
+                    <div>
+                        <strong>Check Your Inbox</strong>
+                        <p>
+                            Visit My Messages to read replies
+                            from the administrator.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <div class="info-icon">🔐</div>
+
+                    <div>
+                        <strong>Private Communication</strong>
+                        <p>
+                            Your support conversation is associated
+                            with your customer account.
+                        </p>
+                    </div>
+
+                </div>
+
+                <a href="{{ url_for('support_list') }}"
+                   class="inbox-link">
+                    <span>📩 Open My Messages</span>
+                    <span>→</span>
+                </a>
+
+            </div>
+
+
+            <div class="sidebar-card">
+
+                <h3>Need More Help?</h3>
+
+                <div class="info-item">
+
+                    <div class="info-icon">🌐</div>
+
+                    <div>
+                        <strong>ShopNova Website</strong>
+                        <p>
+                            Explore our store and discover
+                            available products.
+                        </p>
+                    </div>
+
+                </div>
+
+                <a href="{{ url_for('home') }}"
+                   class="inbox-link">
+                    <span>Visit ShopNova</span>
+                    <span>→</span>
+                </a>
+
+            </div>
+
+        </aside>
+
+    </section>
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+    <p>
+        <strong>ShopNova</strong>
+    </p>
+
+    <p>
+        Discover Quality. Shop Smart.
+    </p>
+
+    <p>
+        © 2026 ShopNova. All rights reserved.
+    </p>
+
+</footer>
+
+
+<!-- CHARACTER COUNTER -->
+
+<script>
+    const messageField = document.getElementById("message");
+    const characterCount = document.getElementById("characterCount");
+
+    messageField.addEventListener("input", function () {
+        const length = this.value.length;
+
+        characterCount.textContent = length + " / 5000 characters";
+
+        if (length > 5000) {
+            characterCount.style.color = "#dc2626";
+        } else {
+            characterCount.style.color = "#64748b";
+        }
+    });
+</script>
+
+</body>
+</html>

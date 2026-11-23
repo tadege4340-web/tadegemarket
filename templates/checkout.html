@@ -1,0 +1,1028 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | ShopNova</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_dashboard.css') }}">
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            color: #111d35;
+        }
+
+        .checkout-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            color: #111d35;
+            font-weight: 800;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .checkout-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            height: 100%;
+        }
+
+        .card-heading {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111d35;
+            margin-bottom: 22px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #334155;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+        }
+
+        .payment-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .payment-box h5 {
+            color: #111d35;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .payment-box p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+
+        .payment-option {
+            display: block;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .payment-option input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .payment-option-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 17px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+        .payment-option input:checked + .payment-option-content {
+            border-color: #f97316;
+            background: #fff7ed;
+        }
+
+        .payment-option input:focus-visible + .payment-option-content {
+            outline: 3px solid rgba(249,115,22,0.25);
+        }
+
+        .payment-logo {
+            width: 45px;
+            min-width: 45px;
+            height: 45px;
+            background: #111d35;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+
+        .payment-option h6 {
+            margin: 0 0 4px;
+            color: #111d35;
+            font-weight: 700;
+        }
+
+        .payment-option small {
+            color: #64748b;
+        }
+
+        .payment-option .radio-icon {
+            margin-left: auto;
+            color: #cbd5e1;
+        }
+
+        .payment-option input:checked + .payment-option-content .radio-icon {
+            color: #f97316;
+        }
+
+        .payment-instructions {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .payment-instructions h6 {
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .account-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .account-detail:last-child {
+            border-bottom: none;
+        }
+
+        .account-detail strong {
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .manual-fields {
+            display: none;
+            margin-top: 18px;
+        }
+
+        .manual-fields.active {
+            display: block;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 700;
+            color: #111d35;
+            margin-bottom: 3px;
+        }
+
+        .item-qty {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .item-price {
+            font-weight: 700;
+            color: #111d35;
+            white-space: nowrap;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            margin-top: 10px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .total-row span {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .total-row strong {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .summary-note {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .btn-pay {
+            background: #111d35;
+            color: white;
+            font-weight: 700;
+            padding: 15px;
+            border-radius: 8px;
+            width: 100%;
+            border: none;
+            font-size: 16px;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-pay:hover {
+            background: #f97316;
+            color: white;
+        }
+
+        .btn-pay:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .security-note {
+            font-size: 13px;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            color: #f97316;
+        }
+
+        .required-star {
+            color: #ef4444;
+        }
+
+        .delivery-info {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            padding: 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 22px;
+        }
+
+        .verification-notice {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            background: #fff;
+        }
+
+        .upload-area i {
+            font-size: 28px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media(max-width: 768px) {
+            .checkout-container {
+                margin: 25px auto;
+                padding: 0 14px;
+            }
+
+            .checkout-card {
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 26px;
+            }
+
+            .total-row strong {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% include '_navbar.html' %}
+
+<main class="checkout-container">
+
+    <h1 class="page-title">ShopNova Checkout</h1>
+
+    <p class="page-subtitle">
+        Enter your delivery information, review your order, and select your payment method.
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if cart_items %}
+
+    <form method="POST"
+          action="{{ url_for('create_checkout_payment') }}"
+          id="checkoutForm"
+          enctype="multipart/form-data">
+
+        <div class="row g-4">
+
+            <!-- DELIVERY INFORMATION -->
+
+            <div class="col-lg-7">
+
+                <div class="checkout-card">
+
+                    <h2 class="card-heading">
+                        <i class="fas fa-truck me-2"></i>
+                        Delivery Information
+                    </h2>
+
+                    <div class="delivery-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Please provide accurate delivery details so ShopNova can deliver your order.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="recipient_name" class="form-label">
+                            Recipient Full Name <span class="required-star">*</span>
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="recipient_name"
+                               name="recipient_name"
+                               value="{{ request.form.get('recipient_name', current_user.full_name if current_user else '') }}"
+                               maxlength="150"
+                               placeholder="Enter recipient full name"
+                               autocomplete="name"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="recipient_phone" class="form-label">
+                            Ethiopian Mobile Number <span class="required-star">*</span>
+                        </label>
+
+                        <input type="tel"
+                               class="form-control"
+                               id="recipient_phone"
+                               name="recipient_phone"
+                               value="{{ request.form.get('recipient_phone', '') }}"
+                               placeholder="09XXXXXXXX or 07XXXXXXXX"
+                               maxlength="10"
+                               pattern="(09|07)[0-9]{8}"
+                               inputmode="numeric"
+                               autocomplete="tel"
+                               required>
+
+                        <small class="text-muted">
+                            Enter a valid 10-digit Ethiopian mobile number.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delivery_city" class="form-label">
+                            Delivery City <span class="required-star">*</span>
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="delivery_city"
+                               name="delivery_city"
+                               value="{{ request.form.get('delivery_city', '') }}"
+                               maxlength="100"
+                               placeholder="Enter your city"
+                               autocomplete="address-level2"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delivery_address" class="form-label">
+                            Full Delivery Address <span class="required-star">*</span>
+                        </label>
+
+                        <textarea class="form-control"
+                                  id="delivery_address"
+                                  name="delivery_address"
+                                  rows="3"
+                                  maxlength="500"
+                                  placeholder="Enter your street, area, house number or nearby landmark"
+                                  autocomplete="street-address"
+                                  required>{{ request.form.get('delivery_address', '') }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="delivery_notes" class="form-label">
+                            Additional Delivery Notes
+                            <span class="text-muted">(Optional)</span>
+                        </label>
+
+                        <textarea class="form-control"
+                                  id="delivery_notes"
+                                  name="delivery_notes"
+                                  rows="3"
+                                  maxlength="1000"
+                                  placeholder="Additional instructions for delivery...">{{ request.form.get('delivery_notes', '') }}</textarea>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- PAYMENT METHOD -->
+
+                    <h2 class="card-heading">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Choose Payment Method
+                    </h2>
+
+                    <label class="payment-option">
+                        <input type="radio"
+                               name="payment_method"
+                               value="chapa"
+                               {% if request.form.get('payment_method', 'chapa') == 'chapa' %}checked{% endif %}
+                               required>
+
+                        <div class="payment-option-content">
+                            <div class="payment-logo">
+                                <i class="fas fa-shield-halved"></i>
+                            </div>
+
+                            <div>
+                                <h6>Chapa Secure Payment</h6>
+                                <small>Online payment through Chapa checkout</small>
+                            </div>
+
+                            <i class="fas fa-circle-check radio-icon"></i>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio"
+                               name="payment_method"
+                               value="cbe_birr"
+                               {% if request.form.get('payment_method') == 'cbe_birr' %}checked{% endif %}>
+
+                        <div class="payment-option-content">
+                            <div class="payment-logo">
+                                <i class="fas fa-building-columns"></i>
+                            </div>
+
+                            <div>
+                                <h6>CBE Birr</h6>
+                                <small>Transfer using your CBE Birr account</small>
+                            </div>
+
+                            <i class="fas fa-circle-check radio-icon"></i>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio"
+                               name="payment_method"
+                               value="telebirr"
+                               {% if request.form.get('payment_method') == 'telebirr' %}checked{% endif %}>
+
+                        <div class="payment-option-content">
+                            <div class="payment-logo">
+                                <i class="fas fa-mobile-screen-button"></i>
+                            </div>
+
+                            <div>
+                                <h6>Telebirr</h6>
+                                <small>Transfer using your Telebirr account</small>
+                            </div>
+
+                            <i class="fas fa-circle-check radio-icon"></i>
+                        </div>
+                    </label>
+
+                    <!-- CHAPA INFORMATION -->
+
+                    <div id="chapaInstructions" class="payment-instructions">
+
+                        <h6>
+                            <i class="fas fa-lock me-2"></i>
+                            Chapa Secure Checkout
+                        </h6>
+
+                        <p class="text-muted small mb-0">
+                            After submitting your order, ShopNova will connect you to Chapa's secure checkout page.
+                            Your order will only be confirmed after the server verifies the transaction with Chapa.
+                        </p>
+
+                    </div>
+
+                    <!-- CBE BIRR INFORMATION -->
+
+                    <div id="cbeInstructions" class="payment-instructions hidden">
+
+                        <h6>
+                            <i class="fas fa-building-columns me-2"></i>
+                            CBE Birr Transfer Instructions
+                        </h6>
+
+                        <p class="text-muted small mb-3">
+                            Transfer the exact order amount to the ShopNova account below.
+                        </p>
+
+                        <div class="account-detail">
+                            <span>Account Name</span>
+                            <strong>{{ cbe_birr_account_name or 'Not configured' }}</strong>
+                        </div>
+
+                        <div class="account-detail">
+                            <span>Account Number</span>
+                            <strong>{{ cbe_birr_account_number or 'Not configured' }}</strong>
+                        </div>
+
+                        <div class="alert alert-warning mt-3 mb-0 small">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Confirm the recipient account before transferring money.
+                        </div>
+
+                    </div>
+
+                    <!-- TELEBIRR INFORMATION -->
+
+                    <div id="telebirrInstructions" class="payment-instructions hidden">
+
+                        <h6>
+                            <i class="fas fa-mobile-screen-button me-2"></i>
+                            Telebirr Transfer Instructions
+                        </h6>
+
+                        <p class="text-muted small mb-3">
+                            Transfer the exact order amount to the ShopNova Telebirr account.
+                        </p>
+
+                        <div class="account-detail">
+                            <span>Account Name</span>
+                            <strong>{{ telebirr_account_name or 'Not configured' }}</strong>
+                        </div>
+
+                        <div class="account-detail">
+                            <span>Telebirr Number</span>
+                            <strong>{{ telebirr_phone_number or 'Not configured' }}</strong>
+                        </div>
+
+                        <div class="alert alert-warning mt-3 mb-0 small">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Confirm the recipient details before transferring money.
+                        </div>
+
+                    </div>
+
+                    <!-- MANUAL PAYMENT FIELDS -->
+
+                    <div id="manualPaymentFields" class="manual-fields">
+
+                        <div class="mb-3">
+
+                            <label for="provider_reference" class="form-label">
+                                Transaction Reference / ID
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   id="provider_reference"
+                                   name="provider_reference"
+                                   value="{{ request.form.get('provider_reference', '') }}"
+                                   maxlength="150"
+                                   placeholder="Enter your transaction reference">
+
+                            <small class="text-muted">
+                                Enter the reference displayed by your bank or payment application.
+                            </small>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label for="receipt" class="form-label">
+                                Upload Payment Receipt
+                                <span class="required-star">*</span>
+                            </label>
+
+                            <div class="upload-area">
+
+                                <i class="fas fa-cloud-arrow-up d-block"></i>
+
+                                <p class="fw-bold mb-2">
+                                    Select your transfer receipt image
+                                </p>
+
+                                <input type="file"
+                                       class="form-control"
+                                       id="receipt"
+                                       name="receipt"
+                                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+
+                                <small class="text-muted d-block mt-2">
+                                    JPG, JPEG, PNG or WEBP. Maximum size: 5 MB.
+                                </small>
+
+                                <div id="receiptPreview" class="mt-3 hidden">
+                                    <img id="receiptPreviewImage"
+                                         src=""
+                                         alt="Receipt preview"
+                                         style="max-width:100%;max-height:180px;border-radius:8px;">
+
+                                    <p id="receiptFileName"
+                                       class="small text-muted mt-2 mb-0"></p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="verification-notice">
+                            <i class="fas fa-shield-halved me-1"></i>
+                            Your transfer will remain pending until a ShopNova administrator independently verifies it.
+                            Uploading a receipt does not automatically confirm payment.
+                        </div>
+
+                    </div>
+
+                    <p class="text-success fw-bold mt-4 mb-3" style="font-size:14px;">
+                        <i class="fas fa-lock me-1"></i>
+                        Secure payment processing
+                    </p>
+
+                    <button type="submit"
+                            class="btn-pay"
+                            id="payButton">
+
+                        <i class="fas fa-lock me-2"></i>
+                        Continue to Payment
+
+                    </button>
+
+                    <p class="security-note mt-3" id="securityMessage">
+                        Your order will be confirmed only after successful payment verification.
+                    </p>
+
+                    <a href="{{ url_for('cart') }}" class="back-link">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Shopping Cart
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ORDER SUMMARY -->
+
+            <div class="col-lg-5">
+
+                <div class="checkout-card">
+
+                    <h2 class="card-heading">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        Order Summary
+                    </h2>
+
+                    {% for item in cart_items %}
+
+                        <div class="summary-item">
+
+                            <div>
+                                <div class="item-name">
+                                    {{ item.product.name }}
+                                </div>
+
+                                <div class="item-qty">
+                                    Quantity: {{ item.quantity }}
+                                </div>
+                            </div>
+
+                            <div class="item-price">
+                                {{ (item.product.price * item.quantity) | currency }}
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                    <div class="total-row">
+                        <span>Total</span>
+                        <strong>{{ total | currency }}</strong>
+                    </div>
+
+                    <p class="summary-note">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Your final amount is calculated and validated by the ShopNova server before payment processing.
+                    </p>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Payment provider</span>
+                        <strong id="selectedProvider">Chapa</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Currency</span>
+                        <strong>ETB</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Delivery</span>
+                        <strong>As arranged</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+    {% else %}
+
+        <div class="checkout-card text-center">
+
+            <i class="fas fa-cart-shopping fa-3x text-muted mb-3"></i>
+
+            <h3>Your cart is empty</h3>
+
+            <p class="text-muted">
+                Add products to your shopping cart before checkout.
+            </p>
+
+            <a href="{{ url_for('cart') }}" class="btn btn-dark mt-3">
+                Return to Cart
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const checkoutForm = document.getElementById("checkoutForm");
+    const payButton = document.getElementById("payButton");
+    const phoneInput = document.getElementById("recipient_phone");
+
+    const chapaInstructions = document.getElementById("chapaInstructions");
+    const cbeInstructions = document.getElementById("cbeInstructions");
+    const telebirrInstructions = document.getElementById("telebirrInstructions");
+
+    const manualFields = document.getElementById("manualPaymentFields");
+    const referenceInput = document.getElementById("provider_reference");
+    const receiptInput = document.getElementById("receipt");
+
+    const selectedProvider = document.getElementById("selectedProvider");
+    const securityMessage = document.getElementById("securityMessage");
+
+    const receiptPreview = document.getElementById("receiptPreview");
+    const receiptPreviewImage = document.getElementById("receiptPreviewImage");
+    const receiptFileName = document.getElementById("receiptFileName");
+
+    let previewUrl = null;
+
+    function updatePaymentMethod() {
+
+        const selected = document.querySelector(
+            'input[name="payment_method"]:checked'
+        );
+
+        if (!selected) return;
+
+        const method = selected.value;
+
+        chapaInstructions.classList.add("hidden");
+        cbeInstructions.classList.add("hidden");
+        telebirrInstructions.classList.add("hidden");
+
+        manualFields.classList.remove("active");
+
+        referenceInput.required = false;
+        receiptInput.required = false;
+
+        if (method === "chapa") {
+
+            chapaInstructions.classList.remove("hidden");
+
+            selectedProvider.textContent = "Chapa";
+
+            securityMessage.textContent =
+                "Your order will be confirmed only after successful verification directly with Chapa.";
+
+            payButton.innerHTML =
+                '<i class="fas fa-lock me-2"></i> Continue to Secure Payment';
+
+        } else if (method === "cbe_birr") {
+
+            cbeInstructions.classList.remove("hidden");
+            manualFields.classList.add("active");
+
+            referenceInput.required = true;
+            receiptInput.required = true;
+
+            selectedProvider.textContent = "CBE Birr";
+
+            securityMessage.textContent =
+                "Your CBE Birr transfer must be verified by a ShopNova administrator.";
+
+            payButton.innerHTML =
+                '<i class="fas fa-paper-plane me-2"></i> Submit CBE Birr Payment';
+
+        } else if (method === "telebirr") {
+
+            telebirrInstructions.classList.remove("hidden");
+            manualFields.classList.add("active");
+
+            referenceInput.required = true;
+            receiptInput.required = true;
+
+            selectedProvider.textContent = "Telebirr";
+
+            securityMessage.textContent =
+                "Your Telebirr transfer must be verified by a ShopNova administrator.";
+
+            payButton.innerHTML =
+                '<i class="fas fa-paper-plane me-2"></i> Submit Telebirr Payment';
+
+        }
+    }
+
+    document.querySelectorAll('input[name="payment_method"]').forEach(
+        function (radio) {
+            radio.addEventListener("change", updatePaymentMethod);
+        }
+    );
+
+    if (phoneInput) {
+        phoneInput.addEventListener("input", function () {
+            this.value = this.value.replace(/\D/g, "").slice(0, 10);
+        });
+    }
+
+    if (receiptInput) {
+
+        receiptInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = null;
+            }
+
+            if (!file) {
+                receiptPreview.classList.add("hidden");
+                return;
+            }
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            const maxSize = 5 * 1024 * 1024;
+
+            if (!allowedTypes.includes(file.type)) {
+                alert("Please select a JPG, PNG or WEBP receipt image.");
+                this.value = "";
+                receiptPreview.classList.add("hidden");
+                return;
+            }
+
+            if (file.size > maxSize) {
+                alert("Receipt image must not exceed 5 MB.");
+                this.value = "";
+                receiptPreview.classList.add("hidden");
+                return;
+            }
+
+            previewUrl = URL.createObjectURL(file);
+
+            receiptPreviewImage.src = previewUrl;
+            receiptFileName.textContent = file.name;
+
+            receiptPreview.classList.remove("hidden");
+        });
+    }
+
+    if (checkoutForm && payButton) {
+
+        checkoutForm.addEventListener("submit", function (event) {
+
+            if (!checkoutForm.checkValidity()) {
+                event.preventDefault();
+                checkoutForm.reportValidity();
+                return;
+            }
+
+            const selected = document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+            if (!selected) {
+                event.preventDefault();
+                alert("Please select a payment method.");
+                return;
+            }
+
+            if (
+                selected.value !== "chapa" &&
+                (!referenceInput.value.trim() || !receiptInput.files.length)
+            ) {
+                event.preventDefault();
+                alert("Enter your transaction reference and upload your payment receipt.");
+                return;
+            }
+
+            payButton.disabled = true;
+
+            if (selected.value === "chapa") {
+                payButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>' +
+                    'Preparing Secure Payment...';
+            } else {
+                payButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>' +
+                    'Submitting Payment...';
+            }
+        });
+    }
+
+    updatePaymentMethod();
+
+});
+</script>
+
+</body>
+</html>

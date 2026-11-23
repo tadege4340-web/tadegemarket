@@ -1,0 +1,14 @@
+.upload-zone {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.upload-zone:hover, 
+.upload-zone.dragover {
+    background: #eff6ff;
+    border-color: #0d6efd;
+}
+
+/* Optional: matching the blue text-primary in headers */
+.text-primary { color: #0d6efd !important; }

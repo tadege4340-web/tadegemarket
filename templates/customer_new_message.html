@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>New Support Message | ShopNova</title>
+    <style>
+        body{font-family:Arial,sans-serif;background:#f4f6fa;margin:0;color:#172337}
+        .container{max-width:650px;margin:50px auto;padding:25px;background:white;border-radius:12px}
+        input,textarea{width:100%;box-sizing:border-box;padding:12px;margin:10px 0 20px;border:1px solid #dce1e8;border-radius:7px;font:inherit}
+        textarea{min-height:160px;resize:vertical}
+        button{background:#f97316;color:white;padding:13px 20px;border:0;border-radius:7px;cursor:pointer;font-weight:bold}
+        a{color:#ea580c;text-decoration:none}
+        .message{padding:10px;background:#fef2f2;margin-bottom:10px;border-radius:6px}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Contact ShopNova Admin</h1>
+    <p>Write your question, complaint, or support request.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+        <label for="subject">Subject</label>
+        <input id="subject" type="text" name="subject" maxlength="200"
+               placeholder="Example: Question about my order" required>
+
+        <label for="message">Your Message</label>
+        <textarea id="message" name="message" maxlength="5000"
+                  placeholder="Write your message here..." required></textarea>
+
+        <button type="submit">Send Message</button>
+    </form>
+
+    <p><a href="{{ url_for('customer_messages') }}">← Back to My Messages</a></p>
+</div>
+</body>
+</html>

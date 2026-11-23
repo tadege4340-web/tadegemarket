@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Inbox | ShopNova</title>
+    
+    <!-- FIX: Bootstrap CSS (Required for the Modal popup to work) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_dashboard.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* Ensure the header is fixed */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* SUPPORT INBOX STYLES */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            margin: 0; 
+            padding-bottom: 50px;
+        }
+
+        .support-container { 
+            max-width: 900px; 
+            margin: 40px auto; 
+            padding: 0 20px; 
+        }
+        
+        .page-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+        }
+        
+        .page-header h1 { 
+            font-weight: 800; 
+            color: #111d35; 
+            margin: 0; 
+            font-size: 32px;
+        }
+        
+        .page-header p {
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .btn-primary-custom { 
+            background: #f97316; 
+            border: none; 
+            padding: 12px 24px; 
+            font-weight: 600; 
+            border-radius: 8px; 
+            color: white;
+            text-decoration: none;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary-custom:hover { 
+            background: #ea580c; 
+            color: white;
+        }
+
+        .conversation-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 24px; 
+            margin-bottom: 16px; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s; 
+            display: block; 
+            text-decoration: none; 
+            color: inherit;
+        }
+        
+        .conversation-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); 
+            border-color: #f97316; 
+        }
+        
+        .conversation-title { 
+            font-weight: 700; 
+            font-size: 18px; 
+            color: #111d35; 
+            margin-bottom: 6px; 
+        }
+        
+        .conversation-meta { 
+            font-size: 14px; 
+            color: #64748b; 
+            display: flex; 
+            gap: 15px; 
+        }
+        
+        .badge-status { 
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 700; 
+            height: fit-content;
+        }
+        
+        .badge-open { background: #dcfce7; color: #166534; }
+        .badge-closed { background: #f1f5f9; color: #64748b; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .empty-state i {
+            font-size: 48px;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- THIS INCLUDES THE NEW UNIFIED NAVBAR -->
+{% include '_navbar.html' %}
+
+<main class="support-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="page-header">
+        <div>
+            <h1>Support Inbox</h1>
+            <p>Manage your conversations with ShopNova Admin</p>
+        </div>
+        <a href="javascript:void(0);" class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#newMessageModal">
+            <i class="fas fa-plus"></i> New Message
+        </a>
+    </div>
+
+    {% if conversations %}
+        {% for conversation in conversations %}
+            {% set unread = namespace(count=0) %}
+            {% for msg in conversation.messages %}
+                {% if msg.sender.role in ['admin', 'administrator'] and not msg.is_read %}
+                    {% set unread.count = unread.count + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            <a href="{{ url_for('support_conversation', conversation_id=conversation.id) }}" class="conversation-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="conversation-title">
+                            {{ conversation.subject }}
+                            {% if unread.count > 0 %}
+                                <span class="badge bg-danger rounded-pill ms-2" style="font-size: 11px;">{{ unread.count }} New</span>
+                            {% endif %}
+                        </div>
+                        <div class="conversation-meta">
+                            <span><i class="far fa-clock me-1"></i>{{ conversation.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                            <span><i class="far fa-comments me-1"></i>{{ conversation.messages|length }} messages</span>
+                        </div>
+                    </div>
+                    <span class="badge-status {{ 'badge-open' if conversation.status == 'open' else 'badge-closed' }}">
+                        {{ conversation.status|capitalize }}
+                    </span>
+                </div>
+            </a>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h4>No messages yet</h4>
+            <p class="text-muted">You haven't started any support conversations.</p>
+            <a href="javascript:void(0);" class="btn-primary-custom mt-3" data-bs-toggle="modal" data-bs-target="#newMessageModal">Start a Conversation</a>
+        </div>
+    {% endif %}
+</main>
+
+<!-- MODAL FOR NEW MESSAGE -->
+<div class="modal fade" id="newMessageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('support') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">New Support Message</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Subject</label>
+                        <input type="text" name="subject" class="form-control" placeholder="E.g., Question about my order" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Message</label>
+                        <textarea name="message" class="form-control" rows="4" placeholder="Describe your issue..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" style="background: #f97316; color: white; font-weight: 600;">Send Message</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS for the Modal to work -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
