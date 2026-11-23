@@ -10,7 +10,7 @@ from pathlib import Path
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 from datetime import datetime, timezone
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, unquote
 
 import requests
 
@@ -719,37 +719,152 @@ def validate_uploaded_image(file):
         ) from error
 
 
+# =========================================================
+# SUPABASE PRODUCT IMAGE STORAGE
+# =========================================================
+
+SUPABASE_URL = os.getenv(
+    "SUPABASE_URL", ""
+).strip().rstrip("/")
+
+SUPABASE_SECRET_KEY = os.getenv(
+    "SUPABASE_SECRET_KEY", ""
+).strip()
+
+SUPABASE_BUCKET = os.getenv(
+    "SUPABASE_BUCKET", "market"
+).strip()
+
+
+def supabase_configured():
+    return bool(
+        SUPABASE_URL
+        and SUPABASE_SECRET_KEY
+        and SUPABASE_BUCKET
+    )
+
+
+def supabase_headers(content_type=None):
+    headers = {
+        "Authorization": f"Bearer {SUPABASE_SECRET_KEY}",
+        "apikey": SUPABASE_SECRET_KEY
+    }
+
+    if content_type:
+        headers["Content-Type"] = content_type
+
+    return headers
+
+
+def get_image_content_type(extension):
+    return {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "webp": "image/webp"
+    }.get(extension.lower(), "application/octet-stream")
+
+
 def save_product_image(file):
     if not file or not file.filename:
         return None
 
     validate_uploaded_image(file)
 
+    if not supabase_configured():
+        raise RuntimeError(
+            "Supabase image storage is not configured."
+        )
+
     extension = secure_filename(
         file.filename.rsplit(".", 1)[1].lower()
     )
 
-    filename = f"{uuid.uuid4().hex}.{extension}"
-    save_path = UPLOAD_FOLDER / filename
+    object_path = f"products/{uuid.uuid4().hex}.{extension}"
 
-    try:
-        file.save(str(save_path))
+    upload_url = (
+        f"{SUPABASE_URL}/storage/v1/object/"
+        f"{SUPABASE_BUCKET}/{object_path}"
+    )
 
-    except Exception:
-        if save_path.exists():
-            save_path.unlink()
+    file.seek(0)
+    image_data = file.read()
 
-        raise
+    if not image_data:
+        raise ValueError("The selected image is empty.")
 
-    return filename
+    response = requests.post(
+        upload_url,
+        data=image_data,
+        headers={
+            **supabase_headers(
+                get_image_content_type(extension)
+            ),
+            "x-upsert": "false"
+        },
+        timeout=30
+    )
+
+    response.raise_for_status()
+
+    return (
+        f"{SUPABASE_URL}/storage/v1/object/public/"
+        f"{SUPABASE_BUCKET}/{object_path}"
+    )
 
 
-def delete_product_image(filename):
-    if not filename:
+def delete_product_image(image_reference):
+    if not image_reference:
         return
 
+    image_reference = str(image_reference).strip()
+
+    if image_reference.startswith(("https://", "http://")):
+        if not supabase_configured():
+            return
+
+        try:
+            parsed = urlsplit(image_reference)
+            configured = urlsplit(SUPABASE_URL)
+
+            prefix = (
+                f"/storage/v1/object/public/"
+                f"{SUPABASE_BUCKET}/"
+            )
+
+            if (
+                parsed.scheme != "https"
+                or parsed.hostname != configured.hostname
+                or not parsed.path.startswith(prefix)
+            ):
+                return
+
+            object_path = unquote(
+                parsed.path[len(prefix):]
+            )
+
+            if not object_path or ".." in object_path.split("/"):
+                return
+
+            response = requests.delete(
+                f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}",
+                json={"prefixes": [object_path]},
+                headers=supabase_headers("application/json"),
+                timeout=20
+            )
+
+            response.raise_for_status()
+
+        except requests.RequestException:
+            app.logger.exception(
+                "Unable to delete Supabase product image."
+            )
+
+        return
+
+    # Support deleting old local product images.
     safe_filename = os.path.basename(
-        str(filename).replace("\\", "/")
+        image_reference.replace("\\", "/")
     )
 
     path = UPLOAD_FOLDER / safe_filename
@@ -757,10 +872,9 @@ def delete_product_image(filename):
     if path.is_file():
         try:
             path.unlink()
-
         except OSError:
             app.logger.exception(
-                "Unable to delete product image."
+                "Unable to delete legacy product image."
             )
 
 
@@ -2017,15 +2131,24 @@ def products_api():
                 "stock": product.stock,
                 "category_id": product.category_id,
                 "category": product.category_name,
+
+                # SUPABASE AND LOCAL IMAGE SUPPORT
                 "image": (
-                    url_for(
-                        "static",
-                        filename=(
-                            f"uploads/products/{product.image}"
-                        )
+                    product.image
+                    if product.image and product.image.startswith(
+                        ("https://", "http://")
                     )
-                    if product.image else None
+                    else (
+                        url_for(
+                            "static",
+                            filename=(
+                                f"uploads/products/{product.image}"
+                            )
+                        )
+                        if product.image else None
+                    )
                 ),
+
                 "icon": product.icon or "📦",
                 "tag": product.tag or "",
                 "is_active": product.is_active
@@ -2033,7 +2156,6 @@ def products_api():
             for product in all_products
         ]
     })
-
 
 # =========================================================
 # ADMIN PRODUCT MANAGEMENT
