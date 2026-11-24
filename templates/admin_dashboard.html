@@ -55,6 +55,10 @@
             color: #991b1b;
         }
 
+        .ajax-error h5 {
+            font-weight: 700;
+        }
+
         .ajax-success-message {
             margin: 15px 0;
         }
@@ -88,8 +92,6 @@
 
         <nav class="sidebar-menu">
 
-            <!-- DASHBOARD -->
-
             <a href="{{ url_for('admin_dashboard') }}"
                data-admin-page
                data-title="Dashboard"
@@ -99,8 +101,6 @@
                 <span>Dashboard</span>
 
             </a>
-
-            <!-- PRODUCT MANAGEMENT -->
 
             <a href="{{ url_for('admin_products') }}"
                data-admin-page
@@ -112,8 +112,6 @@
 
             </a>
 
-            <!-- ADD PRODUCT -->
-
             <a href="{{ url_for('add_product') }}"
                data-admin-page
                data-title="Add New Product"
@@ -124,8 +122,6 @@
 
             </a>
 
-            <!-- ORDERS -->
-
             <a href="{{ url_for('admin_orders') }}"
                data-admin-page
                data-title="Manage Orders"
@@ -135,8 +131,6 @@
                 <span>Manage Orders</span>
 
             </a>
-
-            <!-- PAYMENTS -->
 
             <a href="{{ url_for('admin_payments') }}"
                data-admin-page
@@ -153,8 +147,6 @@
                 </span>
 
             </a>
-
-            <!-- CUSTOMER MESSAGES -->
 
             <a href="{{ url_for('admin_support') }}"
                data-admin-page
@@ -175,8 +167,6 @@
 
             </a>
 
-            <!-- CUSTOMER ACTIVITY - NEW -->
-
             <a href="{{ url_for('admin_customers') }}"
                data-admin-page
                data-title="Customer Activity"
@@ -189,8 +179,6 @@
                 </span>
 
             </a>
-
-            <!-- LOGOUT -->
 
             <a href="{{ url_for('logout') }}" class="logout">
 
@@ -239,6 +227,10 @@
 
                             Product Management
 
+                        {% elif initial_content_template == '_edit_product.html' %}
+
+                            Edit Product
+
                         {% elif initial_content_template == '_add_product.html' %}
 
                             Add New Product
@@ -272,6 +264,10 @@
                         {% elif initial_content_template == '_admin_products.html' %}
 
                             View and manage your products
+
+                        {% elif initial_content_template == '_edit_product.html' %}
+
+                            Update product information
 
                         {% elif initial_content_template == '_add_product.html' %}
 
@@ -412,11 +408,13 @@
             const data = await response.json();
 
             if (data.success) {
+
                 window.dispatchEvent(
                     new CustomEvent("shopnova:presence-updated", {
                         detail: data
                     })
                 );
+
             }
 
         } catch (error) {
@@ -428,6 +426,7 @@
             heartbeatInProgress = false;
 
         }
+
     }
 
     function startAdminHeartbeat() {
@@ -444,6 +443,7 @@
             sendAdminHeartbeat,
             HEARTBEAT_INTERVAL
         );
+
     }
 
     function stopAdminHeartbeat() {
@@ -454,6 +454,7 @@
             window.clearInterval(heartbeatTimer);
             heartbeatTimer = null;
         }
+
     }
 
     document.addEventListener("visibilitychange", function () {
@@ -468,7 +469,6 @@
     });
 
     window.addEventListener("pageshow", startAdminHeartbeat);
-
     window.addEventListener("pagehide", stopAdminHeartbeat);
 
     startAdminHeartbeat();
@@ -480,7 +480,6 @@
 <!-- ADMIN DASHBOARD JAVASCRIPT -->
 
 <script>
-
 document.addEventListener("DOMContentLoaded", function () {
 
     "use strict";
@@ -496,7 +495,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let notificationInProgress = false;
 
 
+    // =====================================================
     // MOBILE SIDEBAR
+    // =====================================================
 
     if (mobileMenuButton && sidebar) {
 
@@ -507,7 +508,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // HTML ESCAPING
+    // =====================================================
+    // ESCAPE HTML
+    // =====================================================
 
     function escapeHtml(value) {
 
@@ -519,7 +522,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+    // =====================================================
     // UPDATE HEADER
+    // =====================================================
 
     function updateHeader(title, subtitle) {
 
@@ -534,7 +539,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ACTIVE MENU
+    // =====================================================
+    // ACTIVE SIDEBAR MENU
+    // =====================================================
 
     function setActiveMenu(url) {
 
@@ -542,6 +549,12 @@ document.addEventListener("DOMContentLoaded", function () {
             url,
             window.location.origin
         ).pathname;
+
+        // Edit product pages belong to Product Management.
+        const normalizedPath = targetPath.replace(
+            /\/edit\/\d+\/?$/,
+            ""
+        );
 
         document.querySelectorAll("a[data-admin-page]").forEach(function (link) {
 
@@ -552,7 +565,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.origin
             ).pathname;
 
-            if (linkPath === targetPath) {
+            if (
+                linkPath === targetPath ||
+                linkPath === normalizedPath
+            ) {
                 link.classList.add("active");
             }
 
@@ -561,7 +577,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // LOADING
+    // =====================================================
+    // LOADING SCREEN
+    // =====================================================
 
     function showLoading() {
 
@@ -576,7 +594,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // CHART
+    // =====================================================
+    // CHART INITIALIZATION
+    // =====================================================
 
     function drawChart() {
 
@@ -599,6 +619,9 @@ document.addEventListener("DOMContentLoaded", function () {
         gradient.addColorStop(0, "rgba(249, 115, 22, 0.2)");
         gradient.addColorStop(1, "rgba(249, 115, 22, 0)");
 
+        // These are demonstration values.
+        // Replace them with real sales data from Flask.
+
         new Chart(ctx, {
 
             type: "line",
@@ -617,7 +640,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 datasets: [{
 
-                    label: "Revenue (ETB)",
+                    label: "Sample Revenue (ETB)",
 
                     data: [
                         12000,
@@ -678,7 +701,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // JSON RESPONSE
+    // =====================================================
+    // READ JSON RESPONSE
+    // =====================================================
 
     async function readJsonResponse(response) {
 
@@ -693,7 +718,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             throw new Error(
-                "The server did not return JSON. Check the Flask route and AJAX response."
+                "The server did not return JSON. Check your Flask AJAX route."
             );
 
         }
@@ -703,7 +728,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // PRODUCT FORM
+    // =====================================================
+    // PRODUCT FORM INITIALIZATION
+    // Works for Add Product and Edit Product.
+    // =====================================================
 
     function initializeProductForm() {
 
@@ -791,7 +819,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        // REMOVE IMAGE
+        // REMOVE SELECTED IMAGE
 
         if (removeBtn) {
 
@@ -829,7 +857,7 @@ document.addEventListener("DOMContentLoaded", function () {
             clearBtn.addEventListener("click", function () {
 
                 if (messageArea) {
-                    messageArea.textContent = "";
+                    messageArea.replaceChildren();
                 }
 
                 window.setTimeout(function () {
@@ -845,7 +873,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        // SUBMIT PRODUCT FORM
+        // SUBMIT ADD / EDIT PRODUCT
 
         form.addEventListener("submit", async function (event) {
 
@@ -873,7 +901,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             if (messageArea) {
-                messageArea.textContent = "";
+                messageArea.replaceChildren();
             }
 
             try {
@@ -896,11 +924,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await readJsonResponse(response);
 
                 if (!response.ok || !data.success) {
-                    throw new Error(data.message || "Unable to save product.");
+
+                    throw new Error(
+                        data.message || "Unable to save product."
+                    );
+
                 }
 
+                const destination =
+                    data.redirect ||
+                    data.redirect_url ||
+                    "/admin/products";
+
                 await loadAdminPage(
-                    data.redirect || data.redirect_url || "/admin/products",
+                    destination,
                     "Product Management",
                     "View and manage your products",
                     true
@@ -916,6 +953,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     alertBox.textContent = error.message;
 
                     messageArea.replaceChildren(alertBox);
+
+                } else {
+
+                    alert(error.message);
 
                 }
 
@@ -937,7 +978,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+    // =====================================================
     // INITIALIZE CURRENT PAGE
+    // =====================================================
 
     function initializeCurrentPage() {
 
@@ -952,7 +995,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // FORM ERROR
+    // =====================================================
+    // SHOW FORM ERROR
+    // =====================================================
 
     function showFormError(form, message) {
 
@@ -962,7 +1007,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             alertBox = document.createElement("div");
 
-            alertBox.className = "alert alert-danger ajax-form-error mt-3";
+            alertBox.className =
+                "alert alert-danger ajax-form-error mt-3";
 
             form.prepend(alertBox);
 
@@ -978,7 +1024,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // AJAX FORM SUBMISSION
+    // =====================================================
+    // GENERIC AJAX POST FORM
+    // Used by Delete, Orders, Support, and other forms.
+    // =====================================================
 
     async function submitAdminForm(form) {
 
@@ -1034,7 +1083,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await readJsonResponse(response);
 
             if (!response.ok || !data.success) {
-                throw new Error(data.message || "The requested action failed.");
+
+                throw new Error(
+                    data.message || "The requested action failed."
+                );
+
             }
 
             const destination =
@@ -1051,6 +1104,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } catch (error) {
 
+            showFormError(form, error.message);
+
+        } finally {
+
             form.dataset.submitting = "false";
 
             if (submitButton) {
@@ -1063,16 +1120,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
             }
 
-            showFormError(form, error.message);
-
         }
 
     }
 
 
+    // =====================================================
     // AJAX PAGE LOADING
+    // =====================================================
 
-    async function loadAdminPage(url, title, subtitle, pushHistory = true) {
+    async function loadAdminPage(
+        url,
+        title,
+        subtitle,
+        pushHistory = true
+    ) {
 
         if (currentController) {
             currentController.abort();
@@ -1107,7 +1169,11 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             if (!response.ok) {
-                throw new Error("Unable to load page. HTTP " + response.status);
+
+                throw new Error(
+                    "Unable to load page. HTTP " + response.status
+                );
+
             }
 
             const html = await response.text();
@@ -1162,7 +1228,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         <i class="fas fa-triangle-exclamation me-2"></i>
                         Page Loading Failed
                     </h5>
+
                     <p>${escapeHtml(error.message)}</p>
+
                     <button class="btn btn-danger btn-sm"
                             type="button"
                             id="ajaxReloadButton">
@@ -1182,11 +1250,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+    // =====================================================
     // RELOAD ERROR BUTTON
+    // =====================================================
 
     document.addEventListener("click", function (event) {
 
-        const reloadButton = event.target.closest("#ajaxReloadButton");
+        const reloadButton = event.target.closest(
+            "#ajaxReloadButton"
+        );
 
         if (reloadButton) {
             window.location.reload();
@@ -1195,11 +1267,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    // =====================================================
     // SIDEBAR AJAX NAVIGATION
+    // =====================================================
 
     document.addEventListener("click", function (event) {
 
-        const link = event.target.closest("a[data-admin-page]");
+        const link = event.target.closest(
+            "a[data-admin-page]"
+        );
 
         if (!link) {
             return;
@@ -1227,11 +1303,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    // =====================================================
     // OTHER ADMIN LINKS
+    // =====================================================
 
     document.addEventListener("click", function (event) {
 
-        const link = event.target.closest("a:not([data-admin-page])");
+        const link = event.target.closest(
+            "a:not([data-admin-page])"
+        );
 
         if (!link) {
             return;
@@ -1287,7 +1367,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-    // GLOBAL ADMIN FORMS
+    // =====================================================
+    // GLOBAL AJAX FORM HANDLER
+    // =====================================================
 
     document.addEventListener("submit", function (event) {
 
@@ -1301,6 +1383,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Payment forms are handled separately.
         if (
             form.id === "paymentDecisionForm" ||
             form.matches("[data-payment-native-form]")
@@ -1308,10 +1391,12 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Product form has its own image-aware handler.
         if (form.id === "productForm") {
             return;
         }
 
+        // Allow explicitly native forms.
         if (form.dataset.nativeForm === "true") {
             return;
         }
@@ -1333,7 +1418,8 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
 
             const url = new URL(
-                form.action || window.location.href
+                form.action || window.location.href,
+                window.location.origin
             );
 
             const params = new URLSearchParams(
@@ -1354,7 +1440,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    // =====================================================
     // BACK AND FORWARD NAVIGATION
+    // =====================================================
 
     window.addEventListener("popstate", function (event) {
 
@@ -1376,14 +1464,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    // =====================================================
     // INITIAL SETUP
+    // =====================================================
 
     setActiveMenu(window.location.href);
 
     initializeCurrentPage();
 
 
+    // =====================================================
     // ADMIN NOTIFICATIONS
+    // =====================================================
 
     async function updateNotifications() {
 
@@ -1474,7 +1566,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // START NOTIFICATION POLLING
+    // =====================================================
+    // NOTIFICATION POLLING
+    // =====================================================
 
     function startNotificationPolling() {
 
@@ -1492,8 +1586,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // STOP NOTIFICATION POLLING
-
     function stopNotificationPolling() {
 
         if (notificationInterval !== null) {
@@ -1507,8 +1599,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // PAGE VISIBILITY
-
     document.addEventListener("visibilitychange", function () {
 
         if (document.visibilityState === "visible") {
@@ -1517,23 +1607,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
-
-    // RESTORE NOTIFICATION POLLING
-
     window.addEventListener("pageshow", startNotificationPolling);
 
-
-    // CLEANUP WHEN LEAVING
-
     window.addEventListener("pagehide", stopNotificationPolling);
-
-
-    // INITIAL NOTIFICATION START
 
     startNotificationPolling();
 
 });
-
 </script>
 
 </body>
