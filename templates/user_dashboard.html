@@ -11,6 +11,17 @@
           href="{{ url_for('static', filename='css/user_dashboard.css') }}">
 
     <style>
+        :root {
+            --primary: #17365d;
+            --primary-light: #2563eb;
+            --text: #334155;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --background: #f8fafc;
+            --success: #16a34a;
+            --danger: #dc2626;
+        }
+
         .navbar {
             position: sticky;
             top: 0;
@@ -19,7 +30,13 @@
             box-shadow: 0 2px 10px rgba(0,0,0,.05);
         }
 
-        .section-card { margin-top: 30px; }
+        .section-card {
+            margin-top: 30px;
+        }
+
+        /* ==============================
+           MESSAGES
+        ============================== */
 
         .messages-section {
             display: none;
@@ -28,11 +45,19 @@
             animation: fadeIn .3s ease-in-out;
         }
 
-        .messages-section.show { display: block; }
+        .messages-section.show {
+            display: block;
+        }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message-summary {
@@ -44,7 +69,7 @@
 
         .message-summary span {
             background: #f1f5f9;
-            color: #334155;
+            color: var(--text);
             padding: 10px 15px;
             border-radius: 8px;
             font-size: 14px;
@@ -52,7 +77,7 @@
 
         .conversation-card {
             background: #fff;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 18px;
@@ -64,17 +89,19 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
         }
 
         .conversation-header h3 {
             margin: 0 0 7px;
-            color: #17365d;
+            color: var(--primary);
         }
 
         .conversation-header small,
-        .message-top small { color: #64748b; }
+        .message-top small {
+            color: var(--muted);
+        }
 
         .conversation-status {
             background: #dbeafe;
@@ -85,13 +112,15 @@
             font-weight: 700;
         }
 
-        .conversation-messages { margin-top: 15px; }
+        .conversation-messages {
+            margin-top: 15px;
+        }
 
         .message-item {
             padding: 15px;
             border-radius: 10px;
             margin-top: 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
         }
 
         .admin-message {
@@ -113,13 +142,13 @@
         }
 
         .message-top strong {
-            color: #17365d;
+            color: var(--primary);
             font-size: 14px;
         }
 
         .message-content {
             margin: 12px 0 5px;
-            color: #334155;
+            color: var(--text);
             line-height: 1.7;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
@@ -128,23 +157,41 @@
         .unread-label {
             display: inline-block;
             margin-top: 8px;
-            color: #dc2626;
+            color: var(--danger);
             font-size: 12px;
             font-weight: 700;
         }
 
-        .empty-messages { text-align: center; padding: 35px 15px; }
-        .empty-message-icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-messages h3 { color: #17365d; }
-        .empty-messages p { color: #64748b; line-height: 1.7; }
-        .no-conversation-messages { color: #64748b; padding: 15px 0; }
+        .empty-messages {
+            text-align: center;
+            padding: 35px 15px;
+        }
+
+        .empty-message-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-messages h3 {
+            color: var(--primary);
+        }
+
+        .empty-messages p {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .no-conversation-messages {
+            color: var(--muted);
+            padding: 15px 0;
+        }
 
         .new-message-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            background: #17365d;
+            background: var(--primary);
             color: #fff;
             padding: 11px 18px;
             border-radius: 8px;
@@ -154,7 +201,7 @@
         }
 
         .new-message-btn:hover {
-            background: #2563eb;
+            background: var(--primary-light);
             color: #fff;
             transform: translateY(-2px);
         }
@@ -165,6 +212,10 @@
             gap: 12px;
             flex-wrap: wrap;
         }
+
+        /* ==============================
+           NOTIFICATIONS
+        ============================== */
 
         .notification-badge {
             display: inline-block;
@@ -178,11 +229,17 @@
             animation: pulse 2s infinite;
         }
 
-        .notification-badge[hidden] { display: none !important; }
+        .notification-badge[hidden] {
+            display: none !important;
+        }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
         }
 
         .notifications-section {
@@ -200,7 +257,7 @@
 
         .mark-all-btn {
             border: none;
-            background: #17365d;
+            background: var(--primary);
             color: #fff;
             padding: 10px 16px;
             border-radius: 8px;
@@ -208,7 +265,9 @@
             font-weight: 600;
         }
 
-        .mark-all-btn:hover { background: #2563eb; }
+        .mark-all-btn:hover {
+            background: var(--primary-light);
+        }
 
         .mark-all-btn:disabled {
             opacity: .5;
@@ -226,7 +285,7 @@
             align-items: flex-start;
             gap: 15px;
             padding: 18px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 12px;
             background: #fff;
             transition: .2s ease;
@@ -254,11 +313,14 @@
             font-size: 21px;
         }
 
-        .notification-details { flex: 1; min-width: 0; }
+        .notification-details {
+            flex: 1;
+            min-width: 0;
+        }
 
         .notification-details h3 {
             margin: 0 0 7px;
-            color: #17365d;
+            color: var(--primary);
             font-size: 16px;
         }
 
@@ -272,7 +334,7 @@
         .notification-date {
             display: block;
             margin-top: 9px;
-            color: #64748b;
+            color: var(--muted);
             font-size: 12px;
         }
 
@@ -288,7 +350,7 @@
         .notification-actions a {
             border: none;
             text-decoration: none;
-            background: #17365d;
+            background: var(--primary);
             color: #fff;
             padding: 8px 12px;
             border-radius: 7px;
@@ -298,7 +360,9 @@
         }
 
         .notification-actions button:hover,
-        .notification-actions a:hover { background: #2563eb; }
+        .notification-actions a:hover {
+            background: var(--primary-light);
+        }
 
         .notification-unread-dot {
             width: 9px;
@@ -312,14 +376,23 @@
         .empty-notifications {
             text-align: center;
             padding: 40px 15px;
-            background: #f8fafc;
+            background: var(--background);
             border: 1px dashed #cbd5e1;
             border-radius: 12px;
         }
 
-        .empty-notifications .empty-icon { font-size: 45px; margin-bottom: 12px; }
-        .empty-notifications h3 { color: #17365d; }
-        .empty-notifications p { color: #64748b; }
+        .empty-notifications .empty-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        .empty-notifications h3 {
+            color: var(--primary);
+        }
+
+        .empty-notifications p {
+            color: var(--muted);
+        }
 
         .notification-feedback {
             display: none;
@@ -329,23 +402,122 @@
             font-size: 14px;
         }
 
-        .notification-feedback.show { display: block; }
-        .notification-feedback.success { background: #dcfce7; color: #166534; }
-        .notification-feedback.error { background: #fee2e2; color: #991b1b; }
+        .notification-feedback.show {
+            display: block;
+        }
+
+        .notification-feedback.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .notification-feedback.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* ==============================
+           PRODUCT IMAGE FIX
+        ============================== */
+
+        .product-card {
+            min-width: 0;
+        }
+
+        .product-image {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            min-height: 180px;
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .product-image img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.04);
+        }
+
+        .product-image-fallback {
+            display: none;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+            background: #f1f5f9;
+        }
+
+        .product-image-fallback.show {
+            display: flex;
+        }
+
+        .product-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 2;
+        }
+
+        .product-card form {
+            margin-top: 12px;
+        }
+
+        .product-card .add-cart-btn {
+            width: 100%;
+        }
+
+        .product-card .add-cart-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        /* ==============================
+           RESPONSIVE
+        ============================== */
 
         @media (max-width: 600px) {
-            .conversation-card { padding: 14px; }
-            .message-summary { flex-direction: column; }
-            .conversation-header { align-items: flex-start; }
-            .message-heading-actions { width: 100%; }
-            .notification-item { padding: 13px; gap: 10px; }
+            .conversation-card {
+                padding: 14px;
+            }
+
+            .message-summary {
+                flex-direction: column;
+            }
+
+            .conversation-header {
+                align-items: flex-start;
+            }
+
+            .message-heading-actions {
+                width: 100%;
+            }
+
+            .notification-item {
+                padding: 13px;
+                gap: 10px;
+            }
+
             .notification-icon {
                 width: 38px;
                 height: 38px;
                 min-width: 38px;
                 font-size: 18px;
             }
-            .notification-heading-actions { align-items: flex-start; }
+
+            .notification-heading-actions {
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -356,9 +528,12 @@
 
 <main class="dashboard-container" id="customer-content-area">
 
+    <!-- FLASH MESSAGES -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
+            <div class="alert alert-{{ category }}" role="alert">
+                {{ message }}
+            </div>
         {% endfor %}
     {% endwith %}
 
@@ -366,14 +541,16 @@
     <section class="welcome-section">
         <div class="welcome-content">
             <span class="welcome-label">CUSTOMER DASHBOARD</span>
+
             <h1>Welcome back, {{ user.full_name }}!</h1>
+
             <p>
                 Discover products, manage your shopping cart, read your messages,
                 and enjoy your shopping experience with ShopNova.
             </p>
+
             <a href="{{ url_for('home') }}#products"
-               class="primary-btn"
-               data-spa-link>
+               class="primary-btn">
                 Explore Products →
             </a>
         </div>
@@ -386,11 +563,12 @@
 
     <!-- STATISTICS -->
     <section class="stats-grid">
+
         <div class="stat-card">
             <div class="stat-icon purple">🛍️</div>
             <div>
                 <p>Available Products</p>
-                <h2>{{ total_products }}</h2>
+                <h2>{{ total_products|default(0, true) }}</h2>
                 <span>Products in our store</span>
             </div>
         </div>
@@ -399,7 +577,7 @@
             <div class="stat-icon orange">🛒</div>
             <div>
                 <p>Shopping Cart</p>
-                <h2>{{ cart_count }}</h2>
+                <h2>{{ cart_count|default(0, true) }}</h2>
                 <span>Items in your cart</span>
             </div>
         </div>
@@ -421,19 +599,23 @@
                 <span>ShopNova member</span>
             </div>
         </div>
+
     </section>
 
     <!-- ACCOUNT INFORMATION -->
     <section class="section-card">
+
         <div class="section-heading">
             <div>
                 <h2>My Account</h2>
                 <p>Your registered account information</p>
             </div>
+
             <span class="status-badge">● Active Account</span>
         </div>
 
         <div class="account-grid">
+
             <div class="account-item">
                 <span class="account-icon">👤</span>
                 <div>
@@ -465,30 +647,39 @@
                     <strong>Customer</strong>
                 </div>
             </div>
+
         </div>
     </section>
 
     <!-- NOTIFICATIONS -->
-    <section class="section-card notifications-section" id="my-notifications">
+    <section class="section-card notifications-section"
+             id="my-notifications">
+
         <div class="section-heading notification-heading-actions">
+
             <div>
                 <h2>
                     🔔 My Notifications
+
                     <span class="notification-badge"
                           id="dashboardUnreadNotifications"
-                          {% if unread_notifications|default(0, true) == 0 %}hidden{% endif %}>
+                          {% if unread_notifications|default(0, true)|int == 0 %}hidden{% endif %}>
                         {{ unread_notifications|default(0, true) }}
                     </span>
                 </h2>
-                <p>Updates about your orders, payments, and ShopNova account.</p>
+
+                <p>
+                    Updates about your orders, payments, and ShopNova account.
+                </p>
             </div>
 
             <button type="button"
                     class="mark-all-btn"
                     id="markAllNotificationsRead"
-                    {% if unread_notifications|default(0, true) == 0 %}disabled{% endif %}>
+                    {% if unread_notifications|default(0, true)|int == 0 %}disabled{% endif %}>
                 ✓ Mark All as Read
             </button>
+
         </div>
 
         <div id="notificationFeedback"
@@ -497,7 +688,9 @@
              aria-live="polite"></div>
 
         <div class="notifications-list" id="notificationsList">
+
             {% for notification in notifications|default([], true) %}
+
                 <article class="notification-item {% if not notification.is_read %}unread{% endif %}"
                          data-notification-id="{{ notification.id }}">
 
@@ -516,14 +709,21 @@
                     </div>
 
                     <div class="notification-details">
+
                         <h3>{{ notification.title }}</h3>
+
                         <p>{{ notification.message }}</p>
 
                         <small class="notification-date">
-                            {{ notification.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                            {% if notification.created_at %}
+                                {{ notification.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                            {% else %}
+                                Date unavailable
+                            {% endif %}
                         </small>
 
                         <div class="notification-actions">
+
                             {% if not notification.is_read %}
                                 <button type="button"
                                         data-mark-notification-read="{{ notification.id }}">
@@ -536,6 +736,7 @@
                                     View Details →
                                 </a>
                             {% endif %}
+
                         </div>
                     </div>
 
@@ -543,8 +744,11 @@
                         <span class="notification-unread-dot"
                               aria-label="Unread"></span>
                     {% endif %}
+
                 </article>
+
             {% else %}
+
                 <div class="empty-notifications" id="emptyNotifications">
                     <div class="empty-icon">🔔</div>
                     <h3>No notifications yet</h3>
@@ -553,20 +757,27 @@
                         they will appear here.
                     </p>
                 </div>
+
             {% endfor %}
+
         </div>
     </section>
 
     <!-- MESSAGES -->
     <section class="section-card messages-section" id="my-messages">
+
         <div class="section-heading">
             <div>
                 <h2>
                     My Messages
-                    {% if unread_messages|default(0, true) > 0 %}
-                        <span class="notification-badge">{{ unread_messages }}</span>
+
+                    {% if unread_messages|default(0, true)|int > 0 %}
+                        <span class="notification-badge">
+                            {{ unread_messages }}
+                        </span>
                     {% endif %}
                 </h2>
+
                 <p>
                     Communicate with the ShopNova administrator, ask questions,
                     and read support replies.
@@ -575,9 +786,9 @@
 
             <div class="message-heading-actions">
                 <span class="status-badge">💬 Support Inbox</span>
+
                 <a href="{{ url_for('support') }}"
-                   class="new-message-btn"
-                   data-spa-link>
+                   class="new-message-btn">
                     ✉ + New Conversation
                 </a>
             </div>
@@ -588,46 +799,62 @@
 
         {% for conversation in conversations %}
             {% for message in conversation.messages %}
+
                 {% set ns.total_messages = ns.total_messages + 1 %}
+
                 {% if message.sender
                       and message.sender.role in ['admin', 'administrator']
                       and not message.is_read %}
                     {% set ns.unread = ns.unread + 1 %}
                 {% endif %}
+
             {% endfor %}
         {% endfor %}
 
         <div class="message-summary">
             <span>📩 Conversations: {{ conversations|length }}</span>
             <span>💬 Total messages: {{ ns.total_messages }}</span>
+
             <span style="color:#dc2626;font-weight:700;">
                 🔔 Unread admin replies: {{ ns.unread }}
             </span>
         </div>
 
         {% for conversation in conversations %}
+
             <article class="conversation-card">
+
                 <div class="conversation-header">
+
                     <div>
                         <h3>{{ conversation.subject }}</h3>
+
                         <small>
                             Conversation #{{ conversation.id }}
-                            · {{ conversation.created_at.strftime('%d %b %Y') }}
+                            ·
+                            {% if conversation.created_at %}
+                                {{ conversation.created_at.strftime('%d %b %Y') }}
+                            {% endif %}
                         </small>
                     </div>
+
                     <span class="conversation-status">
                         {{ conversation.status|capitalize }}
                     </span>
+
                 </div>
 
                 <div class="conversation-messages">
+
                     {% for message in conversation.messages %}
+
                         {% set is_admin = (
                             message.sender
                             and message.sender.role in ['admin', 'administrator']
                         ) %}
 
                         <div class="message-item {% if is_admin %}admin-message{% else %}customer-message{% endif %}">
+
                             <div class="message-top">
                                 <strong>
                                     {% if is_admin %}
@@ -636,51 +863,70 @@
                                         👤 You
                                     {% endif %}
                                 </strong>
+
                                 <small>
-                                    {{ message.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                                    {% if message.created_at %}
+                                        {{ message.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                                    {% endif %}
                                 </small>
                             </div>
 
-                            <p class="message-content">{{ message.message }}</p>
+                            <p class="message-content">
+                                {{ message.message }}
+                            </p>
 
                             {% if is_admin and not message.is_read %}
-                                <span class="unread-label">● New message</span>
+                                <span class="unread-label">
+                                    ● New message
+                                </span>
                             {% endif %}
+
                         </div>
+
                     {% else %}
+
                         <p class="no-conversation-messages">
                             No messages in this conversation yet.
                         </p>
+
                     {% endfor %}
+
                 </div>
 
                 <div style="margin-top:15px;">
                     <a href="{{ url_for('support_conversation', conversation_id=conversation.id) }}"
-                       class="new-message-btn"
-                       data-spa-link>
+                       class="new-message-btn">
                         Open Conversation →
                     </a>
                 </div>
+
             </article>
+
         {% else %}
+
             <div class="empty-messages">
                 <div class="empty-message-icon">📭</div>
+
                 <h3>No messages yet</h3>
+
                 <p>
                     You don't have any support conversations.
                     Start a conversation with the ShopNova administrator.
                 </p>
+
                 <a href="{{ url_for('support') }}"
-                   class="new-message-btn"
-                   data-spa-link>
+                   class="new-message-btn">
                     ✉ Start New Conversation →
                 </a>
             </div>
+
         {% endfor %}
+
     </section>
 
     <!-- PRODUCTS -->
     <section class="products-section" id="products">
+
         <div class="section-heading">
             <div>
                 <h2>Discover Products</h2>
@@ -688,45 +934,111 @@
             </div>
 
             <a href="{{ url_for('home') }}#products"
-               class="view-all"
-               data-spa-link>
+               class="view-all">
                 View All Products →
             </a>
         </div>
 
+        <!-- PRODUCT SEARCH -->
         <form action="{{ url_for('home') }}"
               method="GET"
               class="dashboard-search">
+
             <span>🔍</span>
+
             <input type="search"
                    name="search"
                    placeholder="Search laptops, headphones, fashion..."
                    aria-label="Search products">
+
             <button type="submit">Search</button>
+
         </form>
 
+        <!-- PRODUCT GRID -->
         <div class="product-grid">
-            {% for product in products %}
+
+            {% for product in products|default([], true) %}
+
                 <article class="product-card">
+
                     <div class="product-image">
+
                         {% if product.image %}
-                            {% set image_name = product.image.replace('\\', '/').split('/')[-1] %}
-                            <img src="{{ url_for('static', filename='uploads/products/' ~ image_name) }}"
-                                 alt="{{ product.name }}"
-                                 loading="lazy">
-                        {% else %}
-                            <span class="product-icon">
+
+                            {% set image_url = product.image|string|trim %}
+
+                            {% if image_url.startswith('http://') or image_url.startswith('https://') %}
+
+                                <!-- SUPABASE PUBLIC URL -->
+                                <img
+                                    src="{{ image_url }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    referrerpolicy="no-referrer"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
+                            {% elif image_url.startswith('/static/') %}
+
+                                <!-- LEGACY STATIC URL -->
+                                <img
+                                    src="{{ image_url }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
+                            {% elif image_url.startswith('static/') %}
+
+                                <!-- STATIC PATH WITHOUT LEADING SLASH -->
+                                <img
+                                    src="{{ url_for('static', filename=image_url[7:]) }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
+                            {% else %}
+
+                                <!-- LEGACY UPLOAD FILENAME -->
+                                <img
+                                    src="{{ url_for('static', filename='uploads/products/' ~ image_url.lstrip('/')) }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
+                            {% endif %}
+
+                            <div class="product-image-fallback">
                                 {{ product.icon or '📦' }}
-                            </span>
+                            </div>
+
+                        {% else %}
+
+                            <div class="product-image-fallback show">
+                                {{ product.icon or '📦' }}
+                            </div>
+
                         {% endif %}
 
                         {% if product.tag %}
-                            <span class="product-tag">{{ product.tag }}</span>
+                            <span class="product-tag">
+                                {{ product.tag }}
+                            </span>
                         {% endif %}
+
                     </div>
 
                     <div class="product-information">
+
                         <h3>{{ product.name }}</h3>
+
                         <p class="product-description">
                             {{ product.description or 'Discover this quality product.' }}
                         </p>
@@ -735,38 +1047,59 @@
                             {{ product.price|currency }}
                         </div>
 
-                        {% if product.stock > 0 %}
+                        {% if product.stock|default(0, true)|int > 0 %}
+
                             <span class="stock available">
                                 ● {{ product.stock }} in stock
                             </span>
 
                             <form method="POST"
                                   action="{{ url_for('add_to_cart', product_id=product.id) }}">
-                                <input type="hidden" name="quantity" value="1">
+
+                                <input type="hidden"
+                                       name="quantity"
+                                       value="1">
+
                                 <button type="submit" class="add-cart-btn">
                                     🛒 Add to Cart
                                 </button>
+
                             </form>
+
                         {% else %}
-                            <span class="stock unavailable">● Out of stock</span>
-                            <button class="add-cart-btn disabled" disabled>
+
+                            <span class="stock unavailable">
+                                ● Out of stock
+                            </span>
+
+                            <button type="button"
+                                    class="add-cart-btn disabled"
+                                    disabled>
                                 Out of Stock
                             </button>
+
                         {% endif %}
+
                     </div>
+
                 </article>
+
             {% else %}
+
                 <div class="empty-products">
                     <span>📦</span>
                     <h3>No products available</h3>
                     <p>Please check again later.</p>
                 </div>
+
             {% endfor %}
+
         </div>
     </section>
 
     <!-- QUICK ACTIONS -->
     <section class="quick-section">
+
         <div class="section-heading">
             <div>
                 <h2>Quick Actions</h2>
@@ -775,9 +1108,9 @@
         </div>
 
         <div class="quick-grid">
+
             <a href="{{ url_for('home') }}#products"
-               class="quick-card"
-               data-spa-link>
+               class="quick-card">
                 <span class="quick-icon purple">🛍️</span>
                 <div>
                     <h3>Browse Products</h3>
@@ -787,8 +1120,7 @@
             </a>
 
             <a href="{{ url_for('cart') }}"
-               class="quick-card"
-               data-spa-link>
+               class="quick-card">
                 <span class="quick-icon orange">🛒</span>
                 <div>
                     <h3>My Shopping Cart</h3>
@@ -798,8 +1130,7 @@
             </a>
 
             <a href="{{ url_for('support') }}"
-               class="quick-card"
-               data-spa-link>
+               class="quick-card">
                 <span class="quick-icon blue">💬</span>
                 <div>
                     <h3>My Support Inbox</h3>
@@ -809,8 +1140,7 @@
             </a>
 
             <a href="{{ url_for('support') }}"
-               class="quick-card"
-               data-spa-link>
+               class="quick-card">
                 <span class="quick-icon green">✉️</span>
                 <div>
                     <h3>Send a Message</h3>
@@ -820,8 +1150,7 @@
             </a>
 
             <a href="{{ url_for('about') }}"
-               class="quick-card"
-               data-spa-link>
+               class="quick-card">
                 <span class="quick-icon blue">ℹ️</span>
                 <div>
                     <h3>About ShopNova</h3>
@@ -831,8 +1160,7 @@
             </a>
 
             <a href="{{ url_for('contact') }}"
-               class="quick-card"
-               data-spa-link>
+               class="quick-card">
                 <span class="quick-icon green">📞</span>
                 <div>
                     <h3>Contact Us</h3>
@@ -840,70 +1168,93 @@
                 </div>
                 <span class="quick-arrow">→</span>
             </a>
+
         </div>
+
     </section>
 
     <!-- SHOPPING TIP -->
     <section class="shopping-tip">
         <div class="tip-icon">💡</div>
+
         <div>
             <h3>Shopping Tip</h3>
+
             <p>
                 Always check product availability before placing your order.
                 You can update product quantities directly from your shopping cart.
             </p>
         </div>
     </section>
+
 </main>
 
 <!-- FOOTER -->
 <footer class="footer">
+
     <div class="footer-content">
+
         <div>
             <h2>ShopNova</h2>
             <p>Discover Quality. Shop Smart.</p>
         </div>
 
         <div class="footer-links">
-            <a href="{{ url_for('home') }}" data-spa-link>Home</a>
-            <a href="{{ url_for('about') }}" data-spa-link>About</a>
-            <a href="{{ url_for('contact') }}" data-spa-link>Contact</a>
-            <a href="{{ url_for('cart') }}" data-spa-link>Cart</a>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('cart') }}">Cart</a>
 
-            <!-- FIXED ENDPOINT -->
-            <a href="{{ url_for('dashboard') }}#my-messages"
-               data-spa-link>
+            <a href="{{ url_for('dashboard') }}#my-messages">
                 My Messages
             </a>
 
-            <!-- FIXED ENDPOINT -->
-            <a href="{{ url_for('dashboard') }}#my-notifications"
-               data-spa-link>
+            <a href="{{ url_for('dashboard') }}#my-notifications">
                 Notifications
             </a>
         </div>
+
     </div>
 
     <div class="copyright">
         © 2026 ShopNova. All rights reserved.
     </div>
+
 </footer>
 
+<!-- DASHBOARD JAVASCRIPT -->
 <script>
 (function () {
     "use strict";
 
-    /*
-     * Global initialization guard:
-     * Prevent duplicate event listeners.
-     */
     if (window.shopNovaCustomerDashboardInitialized) {
         return;
     }
 
     window.shopNovaCustomerDashboardInitialized = true;
 
-    const DASHBOARD_SELECTOR = "#customer-content-area";
+    const API = {
+        unreadCounts: "/api/unread-counts",
+        markRead: function (id) {
+            return "/api/notifications/" +
+                encodeURIComponent(id) + "/read";
+        },
+        markAllRead: "/api/notifications/read-all"
+    };
+
+    function getElement(id) {
+        return document.getElementById(id);
+    }
+
+    function showFeedback(message, type) {
+        const feedback = getElement("notificationFeedback");
+
+        if (!feedback) return;
+
+        feedback.textContent = message;
+        feedback.className =
+            "notification-feedback show " + type;
+    }
 
     function scrollToHash(hash) {
         if (!hash) return;
@@ -916,7 +1267,8 @@
             id = hash.replace(/^#/, "");
         }
 
-        const target = document.getElementById(id);
+        const target = getElement(id);
+
         if (!target) return;
 
         if (id === "my-messages") {
@@ -931,114 +1283,124 @@
         });
     }
 
-    function showFeedback(message, type) {
-        const feedback = document.getElementById("notificationFeedback");
-        if (!feedback) return;
-
-        feedback.textContent = message;
-        feedback.className = "notification-feedback show " + type;
-    }
-
     async function getJsonResponse(response) {
-        const contentType = response.headers.get("content-type") || "";
+        const contentType =
+            response.headers.get("content-type") || "";
 
         if (!contentType.includes("application/json")) {
             throw new Error(
-                "The server returned an unexpected response. Please refresh the page."
+                "Unexpected server response. Please refresh the page."
             );
         }
 
         return await response.json();
     }
 
+    async function apiRequest(url, method) {
+        const response = await fetch(url, {
+            method: method,
+            credentials: "same-origin",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            }
+        });
+
+        const data = await getJsonResponse(response);
+
+        if (!response.ok || data.success === false) {
+            throw new Error(
+                data.error ||
+                data.message ||
+                "The request could not be completed."
+            );
+        }
+
+        return data;
+    }
+
     async function updateUnreadBadge() {
         try {
-            const response = await fetch("/api/unread-counts", {
-                method: "GET",
-                credentials: "same-origin",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "Accept": "application/json"
-                }
-            });
+            const data = await apiRequest(
+                API.unreadCounts,
+                "GET"
+            );
 
-            if (!response.ok) return;
-
-            const data = await getJsonResponse(response);
-            const unread = Number(data.unread_notifications || 0);
+            const unread = Math.max(
+                0,
+                Number(data.unread_notifications || 0)
+            );
 
             const badges = [
-                document.getElementById("dashboardUnreadNotifications"),
-                document.getElementById("navUnreadNotifications")
+                getElement("dashboardUnreadNotifications"),
+                getElement("navUnreadNotifications")
             ];
 
             badges.forEach(function (badge) {
                 if (!badge) return;
+
                 badge.textContent = unread;
                 badge.hidden = unread <= 0;
             });
 
-            const button = document.getElementById(
+            const button = getElement(
                 "markAllNotificationsRead"
             );
 
             if (button) {
                 button.disabled = unread <= 0;
             }
+
         } catch (error) {
-            console.error("Unread badge update failed:", error);
+            console.error(
+                "Unread notification count update failed:",
+                error
+            );
+        }
+    }
+
+    function updateNotificationItem(item) {
+        if (!item) return;
+
+        item.classList.remove("unread");
+
+        const readButton = item.querySelector(
+            "[data-mark-notification-read]"
+        );
+
+        if (readButton) {
+            readButton.remove();
+        }
+
+        const dot = item.querySelector(
+            ".notification-unread-dot"
+        );
+
+        if (dot) {
+            dot.remove();
         }
     }
 
     async function markNotificationRead(notificationId) {
         try {
-            const response = await fetch(
-                "/api/notifications/" +
-                encodeURIComponent(notificationId) +
-                "/read",
-                {
-                    method: "POST",
-                    credentials: "same-origin",
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                        "Accept": "application/json"
-                    }
-                }
+            await apiRequest(
+                API.markRead(notificationId),
+                "POST"
             );
 
-            const data = await getJsonResponse(response);
+            const item = document.querySelector(
+                '[data-notification-id="' +
+                CSS.escape(String(notificationId)) +
+                '"]'
+            );
 
-            if (!response.ok || data.success === false) {
-                throw new Error(
-                    data.error ||
-                    data.message ||
-                    "Unable to update notification."
-                );
-            }
+            updateNotificationItem(item);
 
-            const item = Array.from(
-                document.querySelectorAll("[data-notification-id]")
-            ).find(function (element) {
-                return element.dataset.notificationId === String(notificationId);
-            });
+            showFeedback(
+                "Notification marked as read.",
+                "success"
+            );
 
-            if (item) {
-                item.classList.remove("unread");
-
-                const readButton = item.querySelector(
-                    "[data-mark-notification-read]"
-                );
-
-                if (readButton) readButton.remove();
-
-                const dot = item.querySelector(
-                    ".notification-unread-dot"
-                );
-
-                if (dot) dot.remove();
-            }
-
-            showFeedback("Notification marked as read.", "success");
             await updateUnreadBadge();
 
         } catch (error) {
@@ -1047,133 +1409,46 @@
     }
 
     async function markAllNotificationsRead() {
-        const button = document.getElementById(
+        const button = getElement(
             "markAllNotificationsRead"
         );
 
-        if (!button || button.disabled) return;
+        if (!button || button.disabled) {
+            return;
+        }
 
         button.disabled = true;
 
         try {
-            const response = await fetch(
-                "/api/notifications/read-all",
-                {
-                    method: "POST",
-                    credentials: "same-origin",
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                        "Accept": "application/json"
-                    }
-                }
+            await apiRequest(
+                API.markAllRead,
+                "POST"
             );
-
-            const data = await getJsonResponse(response);
-
-            if (!response.ok || data.success === false) {
-                throw new Error(
-                    data.error ||
-                    data.message ||
-                    "Unable to update notifications."
-                );
-            }
 
             document.querySelectorAll(
                 ".notification-item.unread"
-            ).forEach(function (item) {
-                item.classList.remove("unread");
+            ).forEach(updateNotificationItem);
 
-                const readButton = item.querySelector(
-                    "[data-mark-notification-read]"
-                );
+            showFeedback(
+                "All notifications marked as read.",
+                "success"
+            );
 
-                if (readButton) readButton.remove();
-
-                const dot = item.querySelector(
-                    ".notification-unread-dot"
-                );
-
-                if (dot) dot.remove();
-            });
-
-            showFeedback("All notifications marked as read.", "success");
             await updateUnreadBadge();
 
         } catch (error) {
             showFeedback(error.message, "error");
+
             button.disabled = false;
         }
     }
 
-    async function navigateSPA(destination) {
-        const contentArea = document.querySelector(DASHBOARD_SELECTOR);
-
-        if (!contentArea) {
-            window.location.href = destination.href;
-            return;
-        }
-
-        contentArea.style.opacity = "0.5";
-        contentArea.style.pointerEvents = "none";
-
-        try {
-            const response = await fetch(destination.href, {
-                method: "GET",
-                credentials: "same-origin",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "Accept": "text/html"
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error("Page loading failed.");
-            }
-
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
-
-            const newContent = doc.querySelector(DASHBOARD_SELECTOR);
-
-            /*
-             * For pages without the dashboard content container,
-             * use normal navigation.
-             */
-            if (!newContent) {
-                window.location.href = destination.href;
-                return;
-            }
-
-            contentArea.innerHTML = newContent.innerHTML;
-
-            window.history.pushState({}, "", destination.href);
-
-            if (destination.hash) {
-                scrollToHash(destination.hash);
-            } else {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-
-            await updateUnreadBadge();
-
-        } catch (error) {
-            console.error("SPA navigation failed:", error);
-            window.location.href = destination.href;
-
-        } finally {
-            contentArea.style.opacity = "1";
-            contentArea.style.pointerEvents = "auto";
-        }
-    }
-
-    /*
-     * One delegated listener handles dynamically replaced content.
-     */
     document.addEventListener("click", async function (event) {
         const target = event.target;
 
-        if (!(target instanceof Element)) return;
+        if (!(target instanceof Element)) {
+            return;
+        }
 
         const readButton = target.closest(
             "[data-mark-notification-read]"
@@ -1182,12 +1457,19 @@
         if (readButton) {
             event.preventDefault();
 
-            const notificationId = readButton.getAttribute(
-                "data-mark-notification-read"
-            );
+            const notificationId =
+                readButton.getAttribute(
+                    "data-mark-notification-read"
+                );
 
             if (notificationId) {
+                readButton.disabled = true;
+
                 await markNotificationRead(notificationId);
+
+                if (document.body.contains(readButton)) {
+                    readButton.disabled = false;
+                }
             }
 
             return;
@@ -1199,7 +1481,9 @@
 
         if (markAllButton) {
             event.preventDefault();
+
             await markAllNotificationsRead();
+
             return;
         }
 
@@ -1210,7 +1494,7 @@
         if (toggleMessages) {
             event.preventDefault();
 
-            const section = document.getElementById("my-messages");
+            const section = getElement("my-messages");
 
             if (section) {
                 section.classList.toggle("show");
@@ -1219,55 +1503,11 @@
                     scrollToHash("#my-messages");
                 }
             }
-
-            return;
         }
-
-        const link = target.closest("a[data-spa-link]");
-        if (!link) return;
-
-        if (
-            event.ctrlKey ||
-            event.metaKey ||
-            event.shiftKey ||
-            event.altKey ||
-            event.button !== 0 ||
-            link.target === "_blank" ||
-            link.hasAttribute("download")
-        ) {
-            return;
-        }
-
-        const destination = new URL(link.href, window.location.href);
-
-        if (destination.origin !== window.location.origin) return;
-
-        if (
-            destination.pathname === window.location.pathname &&
-            destination.search === window.location.search
-        ) {
-            event.preventDefault();
-
-            window.history.pushState({}, "", destination.href);
-
-            if (destination.hash) {
-                scrollToHash(destination.hash);
-            } else {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-
-            return;
-        }
-
-        event.preventDefault();
-        await navigateSPA(destination);
     });
 
-    /*
-     * Back/forward browser navigation.
-     */
-    window.addEventListener("popstate", function () {
-        window.location.reload();
+    window.addEventListener("hashchange", function () {
+        scrollToHash(window.location.hash);
     });
 
     function initializeDashboard() {
@@ -1287,6 +1527,7 @@
     } else {
         initializeDashboard();
     }
+
 })();
 </script>
 
