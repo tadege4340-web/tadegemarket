@@ -50,17 +50,9 @@
         }
 
         @keyframes notificationPulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.12);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+            100% { transform: scale(1); }
         }
 
         @media (max-width: 900px) {
@@ -76,10 +68,8 @@
 
         <!-- LOGO -->
         <a href="{{ url_for('dashboard') }}" class="logo">
-
             <span class="logo-icon">S</span>
             <span class="logo-text">ShopNova</span>
-
         </a>
 
         <!-- MOBILE MENU BUTTON -->
@@ -99,16 +89,13 @@
         <!-- NAVIGATION CONTENT -->
         <div class="navbar-content" id="navbarContent">
 
-            <!-- NAVIGATION LINKS -->
             <nav class="nav-links">
 
-                <a href="{{ url_for('dashboard') }}"
-                   data-spa-link>
+                <a href="{{ url_for('dashboard') }}" data-spa-link>
                     Dashboard
                 </a>
 
-                <a href="{{ url_for('home') }}"
-                   data-spa-link>
+                <a href="{{ url_for('home') }}" data-spa-link>
                     Store
                 </a>
 
@@ -118,22 +105,18 @@
                    data-spa-link>
 
                     <i class="fas fa-comments"></i>
-
                     My Messages
 
                     <span class="nav-badge"
                           id="navUnreadMessages"
                           {% if not unread_messages|default(0, true) %}hidden{% endif %}>
-
                         {{ unread_messages|default(0, true) }}
-
                     </span>
 
                 </a>
 
             </nav>
 
-            <!-- RIGHT SIDE ACTIONS -->
             <div class="nav-actions">
 
                 <!-- NOTIFICATIONS -->
@@ -143,15 +126,12 @@
                    aria-label="My notifications">
 
                     <i class="fas fa-bell"></i>
-
                     <span>Notifications</span>
 
                     <span class="nav-badge"
                           id="navUnreadNotifications"
                           {% if not unread_notifications|default(0, true) %}hidden{% endif %}>
-
                         {{ unread_notifications|default(0, true) }}
-
                     </span>
 
                 </a>
@@ -170,14 +150,10 @@
                             aria-label="Select currency">
 
                         {% for code, info in currency_options.items() %}
-
                             <option value="{{ code }}"
                                 {% if current_currency == code %}selected{% endif %}>
-
                                 {{ info.flag }} {{ code }}
-
                             </option>
-
                         {% endfor %}
 
                     </select>
@@ -190,7 +166,6 @@
                    data-spa-link>
 
                     <i class="fas fa-shopping-cart"></i>
-
                     <span>Cart</span>
 
                     <span class="cart-count">
@@ -204,7 +179,6 @@
                    class="logout-btn">
 
                     <i class="fas fa-sign-out-alt"></i>
-
                     Logout
 
                 </a>
@@ -235,6 +209,17 @@
     const content = document.getElementById("navbarContent");
 
     // ==========================================
+    // INTERVAL VARIABLES
+    // ==========================================
+
+    let heartbeatTimer = null;
+    let badgeInterval = null;
+    let heartbeatInProgress = false;
+
+    const HEARTBEAT_URL = "{{ url_for('heartbeat') }}";
+    const HEARTBEAT_INTERVAL = 30000;
+
+    // ==========================================
     // MOBILE MENU
     // ==========================================
 
@@ -248,12 +233,7 @@
         toggle.classList.remove("active");
 
         toggle.setAttribute("aria-expanded", "false");
-
-        toggle.setAttribute(
-            "aria-label",
-            "Open navigation menu"
-        );
-
+        toggle.setAttribute("aria-label", "Open navigation menu");
     }
 
     if (toggle && content) {
@@ -278,7 +258,6 @@
 
         });
 
-        // Close menu when a navigation link is clicked.
         content.addEventListener("click", function (event) {
 
             const link = event.target.closest("a");
@@ -289,7 +268,6 @@
 
         });
 
-        // Close menu when clicking outside.
         document.addEventListener("click", function (event) {
 
             if (navbar && !navbar.contains(event.target)) {
@@ -298,7 +276,6 @@
 
         });
 
-        // Close menu when returning to desktop width.
         window.addEventListener("resize", function () {
 
             if (window.innerWidth > 900) {
@@ -321,11 +298,10 @@
                 "{{ url_for('unread_counts') }}",
                 {
                     method: "GET",
-
+                    credentials: "same-origin",
                     headers: {
                         "X-Requested-With": "XMLHttpRequest"
                     },
-
                     cache: "no-store"
                 }
             );
@@ -335,10 +311,6 @@
             }
 
             const data = await response.json();
-
-            // ----------------------------------
-            // UNREAD MESSAGE COUNT
-            // ----------------------------------
 
             const messageBadge = document.getElementById(
                 "navUnreadMessages"
@@ -355,12 +327,7 @@
                     messageCount > 99 ? "99+" : messageCount;
 
                 messageBadge.hidden = messageCount === 0;
-
             }
-
-            // ----------------------------------
-            // UNREAD NOTIFICATION COUNT
-            // ----------------------------------
 
             const notificationBadge = document.getElementById(
                 "navUnreadNotifications"
@@ -380,12 +347,7 @@
 
                 notificationBadge.hidden =
                     notificationCount === 0;
-
             }
-
-            // ----------------------------------
-            // DASHBOARD NOTIFICATION BADGE
-            // ----------------------------------
 
             const dashboardBadge = document.getElementById(
                 "dashboardUnreadNotifications"
@@ -400,12 +362,7 @@
                     Number(data.unread_notifications || 0) > 0
                         ? "inline-block"
                         : "none";
-
             }
-
-            // ----------------------------------
-            // MARK ALL AS READ BUTTON
-            // ----------------------------------
 
             const markAllButton = document.getElementById(
                 "markAllNotificationsRead"
@@ -415,7 +372,6 @@
 
                 markAllButton.disabled =
                     Number(data.unread_notifications || 0) === 0;
-
             }
 
         } catch (error) {
@@ -426,27 +382,159 @@
             );
 
         }
-
     }
 
-    // Initial badge update.
+    // ==========================================
+    // USER ONLINE STATUS HEARTBEAT
+    // ==========================================
+
+    async function sendHeartbeat() {
+
+        if (
+            heartbeatInProgress ||
+            document.visibilityState === "hidden"
+        ) {
+            return;
+        }
+
+        heartbeatInProgress = true;
+
+        try {
+
+            const response = await fetch(
+                HEARTBEAT_URL,
+                {
+                    method: "POST",
+                    credentials: "same-origin",
+                    cache: "no-store",
+
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                }
+            );
+
+            if (response.status === 401 || response.status === 403) {
+
+                stopHeartbeat();
+
+                return;
+            }
+
+            if (!response.ok) {
+
+                console.warn(
+                    "ShopNova heartbeat failed:",
+                    response.status
+                );
+
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "shopnova:presence-updated",
+                        {
+                            detail: data
+                        }
+                    )
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "ShopNova heartbeat error:",
+                error
+            );
+
+        } finally {
+
+            heartbeatInProgress = false;
+        }
+    }
+
+    function startHeartbeat() {
+
+        if (heartbeatTimer !== null) {
+            return;
+        }
+
+        sendHeartbeat();
+
+        heartbeatTimer = window.setInterval(
+            sendHeartbeat,
+            HEARTBEAT_INTERVAL
+        );
+    }
+
+    function stopHeartbeat() {
+
+        if (heartbeatTimer !== null) {
+
+            window.clearInterval(heartbeatTimer);
+
+            heartbeatTimer = null;
+        }
+    }
+
+    // ==========================================
+    // PAGE VISIBILITY
+    // ==========================================
+
+    document.addEventListener("visibilitychange", function () {
+
+        if (document.visibilityState === "visible") {
+            sendHeartbeat();
+        }
+
+    });
+
+    // ==========================================
+    // BROWSER PAGE EVENTS
+    // ==========================================
+
+    window.addEventListener("pageshow", function () {
+
+        startHeartbeat();
+
+        if (document.visibilityState === "visible") {
+            sendHeartbeat();
+        }
+
+    });
+
+    window.addEventListener("pagehide", function () {
+
+        stopHeartbeat();
+
+        if (badgeInterval !== null) {
+            window.clearInterval(badgeInterval);
+            badgeInterval = null;
+        }
+
+    });
+
+    // ==========================================
+    // INITIALIZE
+    // ==========================================
+
     updateNavbarBadges();
 
-    // Refresh badge counts every 20 seconds.
-    const badgeInterval = window.setInterval(
+    badgeInterval = window.setInterval(
         updateNavbarBadges,
         20000
     );
 
-    // Allow dashboard scripts to refresh badges.
     window.updateShopNovaBadges = updateNavbarBadges;
 
-    // Clean up interval when leaving the page.
-    window.addEventListener("pagehide", function () {
-
-        window.clearInterval(badgeInterval);
-
-    });
+    startHeartbeat();
 
 })();
 </script>
