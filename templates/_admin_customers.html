@@ -1,0 +1,132 @@
+
+<div class="container-fluid py-4">
+
+    {% set stats = namespace(online=0, offline=0) %}
+
+    {% for customer in customers %}
+        {% if customer.is_online %}
+            {% set stats.online = stats.online + 1 %}
+        {% else %}
+            {% set stats.offline = stats.offline + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-3">
+                <h6 class="text-muted">Total Customers</h6>
+                <h2>{{ customers|length }}</h2>
+                <i class="fas fa-users text-primary"></i>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-3">
+                <h6 class="text-muted">Online Customers</h6>
+                <h2 class="text-success">{{ stats.online }}</h2>
+                <i class="fas fa-circle text-success"></i>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-3">
+                <h6 class="text-muted">Offline Customers</h6>
+                <h2 class="text-secondary">{{ stats.offline }}</h2>
+                <i class="fas fa-circle text-secondary"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Customer Activity</h5>
+            <small class="text-muted">
+                Monitor customer login and online status
+            </small>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Login Count</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for customer in customers %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ customer.full_name }}
+                            </strong>
+                            <br>
+                            <small class="text-muted">
+                                @{{ customer.username }}
+                            </small>
+                        </td>
+
+                        <td>{{ customer.email }}</td>
+
+                        <td>
+                            {% if customer.is_online %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-circle me-1"></i>
+                                    Online
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-circle me-1"></i>
+                                    Offline
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if customer.last_login %}
+                                {{ customer.last_login.strftime('%Y-%m-%d %H:%M') }}
+                            {% else %}
+                                <span class="text-muted">
+                                    Never logged in
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ customer.login_count or 0 }}
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="5"
+                            class="text-center text-muted py-4">
+                            No customers registered yet.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
