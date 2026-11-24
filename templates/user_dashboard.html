@@ -422,6 +422,7 @@
 
         .product-card {
             min-width: 0;
+            overflow: hidden;
         }
 
         .product-image {
@@ -469,17 +470,42 @@
             z-index: 2;
         }
 
+        /* ==============================
+           ADD TO CART BUTTON
+        ============================== */
+
         .product-card form {
             margin-top: 12px;
         }
 
         .product-card .add-cart-btn {
+            display: block;
             width: 100%;
+            padding: 12px 16px;
+            background: #f97316 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s ease;
+        }
+
+        .product-card .add-cart-btn:hover:not(:disabled) {
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(220,38,38,.25);
         }
 
         .product-card .add-cart-btn:disabled {
-            opacity: .6;
+            background: #9ca3af !important;
+            color: #ffffff !important;
+            opacity: .7;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         /* ==============================
@@ -964,25 +990,24 @@
 
                     <div class="product-image">
 
-                        {% if product.image %}
+                        {% set image_url = product.image|string|trim if product.image else '' %}
 
-                            {% set image_url = product.image|string|trim %}
+                        {% if image_url %}
 
                             {% if image_url.startswith('http://') or image_url.startswith('https://') %}
 
-                                <!-- SUPABASE PUBLIC URL -->
+                                <!-- FULL PUBLIC IMAGE URL -->
                                 <img
                                     src="{{ image_url }}"
                                     alt="{{ product.name }}"
                                     loading="lazy"
                                     decoding="async"
-                                    referrerpolicy="no-referrer"
                                     onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
                                 >
 
                             {% elif image_url.startswith('/static/') %}
 
-                                <!-- LEGACY STATIC URL -->
+                                <!-- STATIC URL -->
                                 <img
                                     src="{{ image_url }}"
                                     alt="{{ product.name }}"
@@ -993,7 +1018,7 @@
 
                             {% elif image_url.startswith('static/') %}
 
-                                <!-- STATIC PATH WITHOUT LEADING SLASH -->
+                                <!-- STATIC PATH -->
                                 <img
                                     src="{{ url_for('static', filename=image_url[7:]) }}"
                                     alt="{{ product.name }}"
@@ -1002,9 +1027,53 @@
                                     onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
                                 >
 
+                            {% elif image_url.startswith('market/') %}
+
+                                <!-- SUPABASE PATH INCLUDING BUCKET NAME -->
+                                <img
+                                    src="https://onxlcfrofncyajikaxer.supabase.co/storage/v1/object/public/{{ image_url }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
+                            {% elif image_url.startswith('products/') %}
+
+                                <!-- SUPABASE PRODUCTS FOLDER -->
+                                <img
+                                    src="https://onxlcfrofncyajikaxer.supabase.co/storage/v1/object/public/market/{{ image_url }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
+                            {% elif image_url.startswith('/uploads/products/') %}
+
+                                <!-- LEGACY UPLOAD PATH -->
+                                <img
+                                    src="{{ url_for('static', filename=image_url.lstrip('/')) }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
+                            {% elif image_url.startswith('uploads/products/') %}
+
+                                <!-- LEGACY UPLOAD PATH -->
+                                <img
+                                    src="{{ url_for('static', filename=image_url) }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                    onerror="this.onerror=null; this.style.display='none'; this.parentElement.querySelector('.product-image-fallback').classList.add('show');"
+                                >
+
                             {% else %}
 
-                                <!-- LEGACY UPLOAD FILENAME -->
+                                <!-- OLD LOCAL IMAGE FILENAME -->
                                 <img
                                     src="{{ url_for('static', filename='uploads/products/' ~ image_url.lstrip('/')) }}"
                                     alt="{{ product.name }}"
@@ -1073,7 +1142,7 @@
                             </span>
 
                             <button type="button"
-                                    class="add-cart-btn disabled"
+                                    class="add-cart-btn"
                                     disabled>
                                 Out of Stock
                             </button>
@@ -1235,10 +1304,12 @@
 
     const API = {
         unreadCounts: "/api/unread-counts",
+
         markRead: function (id) {
             return "/api/notifications/" +
                 encodeURIComponent(id) + "/read";
         },
+
         markAllRead: "/api/notifications/read-all"
     };
 
