@@ -30,6 +30,7 @@ from config import Config
 from db_models import (
     db,
     User,
+    LoginActivity,
     Category,
     Product,
     CartItem,
@@ -432,6 +433,33 @@ def login_required(function):
         return function(*args, **kwargs)
 
     return decorated_function
+
+
+# =========================================================
+# USER ONLINE STATUS HEARTBEAT
+# =========================================================
+
+@app.route("/api/heartbeat", methods=["POST"])
+@login_required
+def heartbeat():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({
+            "success": False,
+            "message": "User not found."
+        }), 401
+
+    now = datetime.now(timezone.utc)
+
+    user.last_seen = now
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Online status updated."
+    }), 200
 
 
 def admin_required(function):
@@ -1789,9 +1817,15 @@ def register():
 # LOGIN AND LOGOUT
 # =========================================================
 
+# =========================================================
+# LOGIN ROUTE WITH LOGIN ACTIVITY TRACKING
+# =========================================================
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
     if request.method == "POST":
+
         username_or_email = (
             request.form.get("email")
             or request.form.get("username")
@@ -1799,11 +1833,11 @@ def login():
             or ""
         ).strip()
 
-        password = request.form.get(
-            "password", ""
-        )
+        password = request.form.get("password", "")
 
+        # Validate input
         if not username_or_email or not password:
+
             flash(
                 "Enter your email/username and password.",
                 "danger"
@@ -1811,6 +1845,7 @@ def login():
 
             return render_template("login.html")
 
+        # Find user by username or email
         user = User.query.filter(
             or_(
                 User.username.ilike(username_or_email),
@@ -1818,6 +1853,7 @@ def login():
             )
         ).first()
 
+        # Verify password
         if (
             user
             and user.password_hash
@@ -1826,15 +1862,55 @@ def login():
                 password
             )
         ):
-            selected_currency = session.get(
-                "currency"
-            )
 
+            try:
+                # Current UTC time
+                now = datetime.now(timezone.utc)
+
+                # Update user login information
+                user.last_login = now
+                user.last_seen = now
+                user.login_count = (user.login_count or 0) + 1
+
+                # Record successful login activity
+                activity = LoginActivity(
+                    user_id=user.id,
+                    login_time=now,
+                    ip_address=request.remote_addr,
+                    status="success"
+                )
+
+                db.session.add(activity)
+
+                # Save login information
+                db.session.commit()
+
+            except Exception:
+
+                db.session.rollback()
+
+                app.logger.exception(
+                    "Failed to save login activity."
+                )
+
+                flash(
+                    "Login could not be completed. Please try again.",
+                    "danger"
+                )
+
+                return render_template("login.html")
+
+            # Preserve selected currency
+            selected_currency = session.get("currency")
+
+            # Clear old session
             session.clear()
 
+            # Restore selected currency
             if selected_currency in SUPPORTED_CURRENCIES:
                 session["currency"] = selected_currency
 
+            # Create authenticated session
             session["user_id"] = user.id
             session["username"] = user.username
             session["role"] = user.role
@@ -1844,7 +1920,9 @@ def login():
                 "success"
             )
 
+            # Redirect according to role
             if user.role == "admin":
+
                 return redirect(
                     url_for("admin_dashboard")
                 )
@@ -1853,6 +1931,7 @@ def login():
                 url_for("dashboard")
             )
 
+        # Invalid credentials
         flash(
             "Invalid username/email or password.",
             "danger"
@@ -1861,14 +1940,20 @@ def login():
     return render_template("login.html")
 
 
+# =========================================================
+# LOGOUT ROUTE
+# =========================================================
+
 @app.route("/logout")
 def logout():
-    selected_currency = session.get(
-        "currency"
-    )
 
+    # Preserve selected currency
+    selected_currency = session.get("currency")
+
+    # Clear authenticated session
     session.clear()
 
+    # Restore currency preference
     if selected_currency in SUPPORTED_CURRENCIES:
         session["currency"] = selected_currency
 
@@ -1877,7 +1962,9 @@ def logout():
         "success"
     )
 
-    return redirect(url_for("home"))
+    return redirect(
+        url_for("home")
+    )
 
 
 # =========================================================

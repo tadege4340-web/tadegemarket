@@ -1,5 +1,5 @@
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import (
@@ -33,10 +33,49 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(150), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), default="customer", nullable=False, index=True)
-    created_at = db.Column(db.DateTime(timezone=True), default=utc_now, nullable=False)
 
-    orders = db.relationship("Order", back_populates="user", lazy=True)
+    role = db.Column(
+        db.String(20),
+        default="customer",
+        nullable=False,
+        index=True
+    )
+
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
+
+    # =====================================================
+    # CUSTOMER LOGIN AND ACTIVITY TRACKING
+    # =====================================================
+
+    last_login = db.Column(
+        db.DateTime(timezone=True),
+        nullable=True
+    )
+
+    last_seen = db.Column(
+        db.DateTime(timezone=True),
+        nullable=True
+    )
+
+    login_count = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False
+    )
+
+    # =====================================================
+    # EXISTING RELATIONSHIPS
+    # =====================================================
+
+    orders = db.relationship(
+        "Order",
+        back_populates="user",
+        lazy=True
+    )
 
     cart_items = db.relationship(
         "CartItem",
@@ -60,7 +99,6 @@ class User(db.Model):
         lazy=True
     )
 
-    # NEW: Customer notifications
     notifications = db.relationship(
         "Notification",
         back_populates="user",
@@ -69,8 +107,86 @@ class User(db.Model):
         order_by="Notification.created_at.desc()"
     )
 
+    login_activities = db.relationship(
+        "LoginActivity",
+        back_populates="user",
+        lazy=True,
+        cascade="all, delete-orphan",
+        order_by="LoginActivity.login_time.desc()"
+    )
+
+    # =====================================================
+    # ONLINE STATUS
+    # =====================================================
+
+    @property
+    def is_online(self):
+        if not self.last_seen:
+            return False
+
+        last_seen = self.last_seen
+
+        if last_seen.tzinfo is None:
+            last_seen = last_seen.replace(tzinfo=timezone.utc)
+
+        return utc_now() - last_seen < timedelta(minutes=2)
+
     def __repr__(self):
         return f"<User {self.username}>"
+
+
+# =========================================================
+# LOGIN ACTIVITY MODEL
+# =========================================================
+
+class LoginActivity(db.Model):
+
+    __tablename__ = "login_activity"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+    login_time = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
+
+    ip_address = db.Column(
+        db.String(100),
+        nullable=True
+    )
+
+    status = db.Column(
+        db.String(20),
+        default="success",
+        nullable=False
+    )
+
+    user = db.relationship(
+        "User",
+        back_populates="login_activities"
+    )
+
+    __table_args__ = (
+        Index(
+            "idx_login_activity_user_time",
+            "user_id",
+            "login_time"
+        ),
+    )
+
+    def __repr__(self):
+        return f"<LoginActivity {self.user_id}>"
 
 
 # =========================================================
@@ -119,10 +235,24 @@ class Product(db.Model):
     tag = db.Column(db.String(50))
     image = db.Column(db.String(255))
     stock = db.Column(db.Integer, default=0, nullable=False)
-    is_active = db.Column(db.Boolean, default=True, nullable=False, index=True)
-    created_at = db.Column(db.DateTime(timezone=True), default=utc_now, nullable=False)
 
-    category = db.relationship("Category", back_populates="products")
+    is_active = db.Column(
+        db.Boolean,
+        default=True,
+        nullable=False,
+        index=True
+    )
+
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
+
+    category = db.relationship(
+        "Category",
+        back_populates="products"
+    )
 
     order_items = db.relationship(
         "OrderItem",
@@ -138,9 +268,19 @@ class Product(db.Model):
     )
 
     __table_args__ = (
-        CheckConstraint("price > 0", name="check_product_price_positive"),
-        CheckConstraint("stock >= 0", name="check_product_stock_nonnegative"),
-        Index("idx_product_active_created", "is_active", "created_at"),
+        CheckConstraint(
+            "price > 0",
+            name="check_product_price_positive"
+        ),
+        CheckConstraint(
+            "stock >= 0",
+            name="check_product_stock_nonnegative"
+        ),
+        Index(
+            "idx_product_active_created",
+            "is_active",
+            "created_at"
+        ),
     )
 
     @property
@@ -175,16 +315,45 @@ class CartItem(db.Model):
         index=True
     )
 
-    quantity = db.Column(db.Integer, default=1, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=utc_now, nullable=False)
-    updated_at = db.Column(db.DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
+    quantity = db.Column(
+        db.Integer,
+        default=1,
+        nullable=False
+    )
 
-    user = db.relationship("User", back_populates="cart_items")
-    product = db.relationship("Product", back_populates="cart_items")
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
+
+    updated_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
+        nullable=False
+    )
+
+    user = db.relationship(
+        "User",
+        back_populates="cart_items"
+    )
+
+    product = db.relationship(
+        "Product",
+        back_populates="cart_items"
+    )
 
     __table_args__ = (
-        UniqueConstraint("user_id", "product_id", name="unique_user_product_cart"),
-        CheckConstraint("quantity > 0", name="check_cart_quantity_positive"),
+        UniqueConstraint(
+            "user_id",
+            "product_id",
+            name="unique_user_product_cart"
+        ),
+        CheckConstraint(
+            "quantity > 0",
+            name="check_cart_quantity_positive"
+        ),
     )
 
     @property
@@ -214,7 +383,10 @@ class Order(db.Model):
         index=True
     )
 
-    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    total_amount = db.Column(
+        db.Numeric(10, 2),
+        nullable=False
+    )
 
     status = db.Column(
         db.String(30),
@@ -223,9 +395,16 @@ class Order(db.Model):
         index=True
     )
 
-    created_at = db.Column(db.DateTime(timezone=True), default=utc_now, nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
 
-    user = db.relationship("User", back_populates="orders")
+    user = db.relationship(
+        "User",
+        back_populates="orders"
+    )
 
     items = db.relationship(
         "OrderItem",
@@ -243,8 +422,15 @@ class Order(db.Model):
     )
 
     __table_args__ = (
-        CheckConstraint("total_amount >= 0", name="check_order_total_nonnegative"),
-        Index("idx_order_user_created", "user_id", "created_at"),
+        CheckConstraint(
+            "total_amount >= 0",
+            name="check_order_total_nonnegative"
+        ),
+        Index(
+            "idx_order_user_created",
+            "user_id",
+            "created_at"
+        ),
     )
 
     def __repr__(self):
@@ -275,15 +461,35 @@ class OrderItem(db.Model):
         index=True
     )
 
-    quantity = db.Column(db.Integer, nullable=False)
-    unit_price = db.Column(db.Numeric(10, 2), nullable=False)
+    quantity = db.Column(
+        db.Integer,
+        nullable=False
+    )
 
-    order = db.relationship("Order", back_populates="items")
-    product = db.relationship("Product", back_populates="order_items")
+    unit_price = db.Column(
+        db.Numeric(10, 2),
+        nullable=False
+    )
+
+    order = db.relationship(
+        "Order",
+        back_populates="items"
+    )
+
+    product = db.relationship(
+        "Product",
+        back_populates="order_items"
+    )
 
     __table_args__ = (
-        CheckConstraint("quantity > 0", name="check_order_item_quantity_positive"),
-        CheckConstraint("unit_price >= 0", name="check_order_item_price_nonnegative"),
+        CheckConstraint(
+            "quantity > 0",
+            name="check_order_item_quantity_positive"
+        ),
+        CheckConstraint(
+            "unit_price >= 0",
+            name="check_order_item_price_nonnegative"
+        ),
     )
 
     @property
@@ -382,12 +588,26 @@ class Payment(db.Model):
         nullable=True
     )
 
-    order = db.relationship("Order", back_populates="payments")
+    order = db.relationship(
+        "Order",
+        back_populates="payments"
+    )
 
     __table_args__ = (
-        CheckConstraint("amount > 0", name="check_payment_amount_positive"),
-        Index("idx_payment_order_created", "order_id", "created_at"),
-        Index("idx_payment_status_created", "status", "created_at"),
+        CheckConstraint(
+            "amount > 0",
+            name="check_payment_amount_positive"
+        ),
+        Index(
+            "idx_payment_order_created",
+            "order_id",
+            "created_at"
+        ),
+        Index(
+            "idx_payment_status_created",
+            "status",
+            "created_at"
+        ),
     )
 
     def __repr__(self):
@@ -411,7 +631,10 @@ class SupportConversation(db.Model):
         index=True
     )
 
-    subject = db.Column(db.String(200), nullable=False)
+    subject = db.Column(
+        db.String(200),
+        nullable=False
+    )
 
     status = db.Column(
         db.String(20),
@@ -420,7 +643,11 @@ class SupportConversation(db.Model):
         index=True
     )
 
-    created_at = db.Column(db.DateTime(timezone=True), default=utc_now, nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
 
     customer = db.relationship(
         "User",
@@ -437,7 +664,11 @@ class SupportConversation(db.Model):
     )
 
     __table_args__ = (
-        Index("idx_support_customer_created", "customer_id", "created_at"),
+        Index(
+            "idx_support_customer_created",
+            "customer_id",
+            "created_at"
+        ),
     )
 
     def __repr__(self):
@@ -470,9 +701,17 @@ class SupportMessage(db.Model):
 
     message = db.Column(db.Text, nullable=False)
 
-    created_at = db.Column(db.DateTime(timezone=True), default=utc_now, nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=utc_now,
+        nullable=False
+    )
 
-    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    is_read = db.Column(
+        db.Boolean,
+        default=False,
+        nullable=False
+    )
 
     conversation = db.relationship(
         "SupportConversation",
@@ -498,7 +737,7 @@ class SupportMessage(db.Model):
 
 
 # =========================================================
-# NEW: CUSTOMER NOTIFICATION MODEL
+# CUSTOMER NOTIFICATION MODEL
 # =========================================================
 
 class Notification(db.Model):
@@ -524,7 +763,6 @@ class Notification(db.Model):
         nullable=False
     )
 
-    # order_delivered, order_rejected, order_updated, payment_updated
     notification_type = db.Column(
         db.String(40),
         default="order_updated",
@@ -532,7 +770,6 @@ class Notification(db.Model):
         index=True
     )
 
-    # Optional link to the relevant order page
     link = db.Column(
         db.String(255),
         nullable=True
