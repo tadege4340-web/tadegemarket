@@ -8,11 +8,8 @@
     <title>ShopNova | Admin Dashboard</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -73,9 +70,7 @@
 
 <div class="admin-layout">
 
-    <!-- ==========================================
-         SIDEBAR
-    =========================================== -->
+    <!-- SIDEBAR -->
 
     <aside class="sidebar" id="adminSidebar">
 
@@ -93,6 +88,8 @@
 
         <nav class="sidebar-menu">
 
+            <!-- DASHBOARD -->
+
             <a href="{{ url_for('admin_dashboard') }}"
                data-admin-page
                data-title="Dashboard"
@@ -102,6 +99,8 @@
                 <span>Dashboard</span>
 
             </a>
+
+            <!-- PRODUCT MANAGEMENT -->
 
             <a href="{{ url_for('admin_products') }}"
                data-admin-page
@@ -113,6 +112,8 @@
 
             </a>
 
+            <!-- ADD PRODUCT -->
+
             <a href="{{ url_for('add_product') }}"
                data-admin-page
                data-title="Add New Product"
@@ -123,6 +124,8 @@
 
             </a>
 
+            <!-- ORDERS -->
+
             <a href="{{ url_for('admin_orders') }}"
                data-admin-page
                data-title="Manage Orders"
@@ -132,6 +135,8 @@
                 <span>Manage Orders</span>
 
             </a>
+
+            <!-- PAYMENTS -->
 
             <a href="{{ url_for('admin_payments') }}"
                data-admin-page
@@ -148,6 +153,8 @@
                 </span>
 
             </a>
+
+            <!-- CUSTOMER MESSAGES -->
 
             <a href="{{ url_for('admin_support') }}"
                data-admin-page
@@ -168,6 +175,23 @@
 
             </a>
 
+            <!-- CUSTOMER ACTIVITY - NEW -->
+
+            <a href="{{ url_for('admin_customers') }}"
+               data-admin-page
+               data-title="Customer Activity"
+               data-subtitle="Monitor registered customers and their online status">
+
+                <i class="fas fa-users"></i>
+
+                <span style="margin-left:12px;">
+                    Customer Activity
+                </span>
+
+            </a>
+
+            <!-- LOGOUT -->
+
             <a href="{{ url_for('logout') }}" class="logout">
 
                 <i class="fas fa-right-from-bracket"></i>
@@ -180,9 +204,7 @@
     </aside>
 
 
-    <!-- ==========================================
-         MAIN CONTENT
-    =========================================== -->
+    <!-- MAIN CONTENT -->
 
     <main class="main-content">
 
@@ -225,6 +247,10 @@
 
                             Payment Management
 
+                        {% elif initial_content_template == '_admin_customers.html' %}
+
+                            Customer Activity
+
                         {% else %}
 
                             Dashboard
@@ -254,6 +280,10 @@
                         {% elif initial_content_template == '_admin_payments.html' %}
 
                             Review and verify customer payments
+
+                        {% elif initial_content_template == '_admin_customers.html' %}
+
+                            Monitor customer accounts and online activity
 
                         {% else %}
 
@@ -291,9 +321,7 @@
         </header>
 
 
-        <!-- ======================================
-             DYNAMIC CONTENT
-        ======================================= -->
+        <!-- DYNAMIC CONTENT -->
 
         <div id="admin-page-content">
 
@@ -318,24 +346,16 @@
 </div>
 
 
-<!-- ==========================================
-     BOOTSTRAP
-=========================================== -->
+<!-- BOOTSTRAP -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-
-<!-- ==========================================
-     PAYMENT JAVASCRIPT
-     LOAD ONLY ONCE
-=========================================== -->
+<!-- PAYMENT JAVASCRIPT -->
 
 <script src="{{ url_for('static', filename='js/admin_payments.js') }}" defer></script>
 
 
-<!-- ==========================================
-     ADMIN ONLINE STATUS HEARTBEAT
-=========================================== -->
+<!-- ADMIN HEARTBEAT -->
 
 <script>
 (function () {
@@ -349,19 +369,11 @@
     window.shopNovaAdminPresenceInitialized = true;
 
     const HEARTBEAT_URL = "{{ url_for('heartbeat') }}";
-
     const HEARTBEAT_INTERVAL = 30000;
 
     let heartbeatTimer = null;
-
     let heartbeatInProgress = false;
-
     let heartbeatEnabled = true;
-
-
-    // ------------------------------------------
-    // SEND HEARTBEAT
-    // ------------------------------------------
 
     async function sendAdminHeartbeat() {
 
@@ -378,87 +390,45 @@
         try {
 
             const response = await fetch(HEARTBEAT_URL, {
-
                 method: "POST",
-
                 credentials: "same-origin",
-
                 cache: "no-store",
-
                 headers: {
-
                     "Accept": "application/json",
-
                     "X-Requested-With": "XMLHttpRequest"
-
                 }
-
             });
 
-
-            // Session expired or access denied.
-
-            if (
-                response.status === 401 ||
-                response.status === 403
-            ) {
-
+            if (response.status === 401 || response.status === 403) {
                 stopAdminHeartbeat();
-
                 return;
-
             }
-
 
             if (!response.ok) {
-
-                console.warn(
-                    "Admin heartbeat failed:",
-                    response.status
-                );
-
+                console.warn("Admin heartbeat failed:", response.status);
                 return;
-
             }
-
 
             const data = await response.json();
 
-
             if (data.success) {
-
                 window.dispatchEvent(
-
-                    new CustomEvent(
-                        "shopnova:presence-updated",
-                        {
-                            detail: data
-                        }
-                    )
-
+                    new CustomEvent("shopnova:presence-updated", {
+                        detail: data
+                    })
                 );
-
             }
 
         } catch (error) {
 
-            console.error(
-                "Admin heartbeat error:",
-                error
-            );
+            console.error("Admin heartbeat error:", error);
 
         } finally {
 
             heartbeatInProgress = false;
 
         }
-
     }
-
-
-    // ------------------------------------------
-    // START HEARTBEAT
-    // ------------------------------------------
 
     function startAdminHeartbeat() {
 
@@ -471,87 +441,35 @@
         sendAdminHeartbeat();
 
         heartbeatTimer = window.setInterval(
-
             sendAdminHeartbeat,
-
             HEARTBEAT_INTERVAL
-
         );
-
     }
-
-
-    // ------------------------------------------
-    // STOP HEARTBEAT
-    // ------------------------------------------
 
     function stopAdminHeartbeat() {
 
         heartbeatEnabled = false;
 
         if (heartbeatTimer !== null) {
-
             window.clearInterval(heartbeatTimer);
-
             heartbeatTimer = null;
-
         }
-
     }
 
+    document.addEventListener("visibilitychange", function () {
 
-    // ------------------------------------------
-    // BROWSER VISIBILITY
-    // ------------------------------------------
-
-    document.addEventListener(
-        "visibilitychange",
-        function () {
-
-            if (
-                document.visibilityState === "visible" &&
-                heartbeatEnabled
-            ) {
-
-                sendAdminHeartbeat();
-
-            }
-
+        if (
+            document.visibilityState === "visible" &&
+            heartbeatEnabled
+        ) {
+            sendAdminHeartbeat();
         }
-    );
 
+    });
 
-    // ------------------------------------------
-    // RESTORE PAGE
-    // ------------------------------------------
+    window.addEventListener("pageshow", startAdminHeartbeat);
 
-    window.addEventListener(
-        "pageshow",
-        function () {
-
-            startAdminHeartbeat();
-
-        }
-    );
-
-
-    // ------------------------------------------
-    // LEAVE PAGE
-    // ------------------------------------------
-
-    window.addEventListener(
-        "pagehide",
-        function () {
-
-            stopAdminHeartbeat();
-
-        }
-    );
-
-
-    // ------------------------------------------
-    // INITIAL START
-    // ------------------------------------------
+    window.addEventListener("pagehide", stopAdminHeartbeat);
 
     startAdminHeartbeat();
 
@@ -559,9 +477,7 @@
 </script>
 
 
-<!-- ==========================================
-     ADMIN DASHBOARD JAVASCRIPT
-=========================================== -->
+<!-- ADMIN DASHBOARD JAVASCRIPT -->
 
 <script>
 
@@ -569,65 +485,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     "use strict";
 
-
-    // ------------------------------------------
-    // ELEMENTS
-    // ------------------------------------------
-
-    const content = document.getElementById(
-        "admin-page-content"
-    );
-
-    const pageTitle = document.getElementById(
-        "admin-page-title"
-    );
-
-    const pageSubtitle = document.getElementById(
-        "admin-page-subtitle"
-    );
-
-    const sidebar = document.getElementById(
-        "adminSidebar"
-    );
-
-    const mobileMenuButton = document.getElementById(
-        "mobileMenuButton"
-    );
-
+    const content = document.getElementById("admin-page-content");
+    const pageTitle = document.getElementById("admin-page-title");
+    const pageSubtitle = document.getElementById("admin-page-subtitle");
+    const sidebar = document.getElementById("adminSidebar");
+    const mobileMenuButton = document.getElementById("mobileMenuButton");
 
     let currentController = null;
-
     let notificationInterval = null;
-
     let notificationInProgress = false;
 
 
-    // ------------------------------------------
     // MOBILE SIDEBAR
-    // ------------------------------------------
 
     if (mobileMenuButton && sidebar) {
 
-        mobileMenuButton.addEventListener(
-            "click",
-            function () {
-
-                sidebar.classList.toggle("show");
-
-            }
-        );
+        mobileMenuButton.addEventListener("click", function () {
+            sidebar.classList.toggle("show");
+        });
 
     }
 
 
-    // ------------------------------------------
-    // SAFE HTML ESCAPING
-    // ------------------------------------------
+    // HTML ESCAPING
 
     function escapeHtml(value) {
 
         const div = document.createElement("div");
-
         div.textContent = String(value ?? "");
 
         return div.innerHTML;
@@ -635,9 +519,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
     // UPDATE HEADER
-    // ------------------------------------------
 
     function updateHeader(title, subtitle) {
 
@@ -652,9 +534,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
-    // ACTIVE SIDEBAR MENU
-    // ------------------------------------------
+    // ACTIVE MENU
 
     function setActiveMenu(url) {
 
@@ -663,10 +543,7 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.origin
         ).pathname;
 
-
-        document.querySelectorAll(
-            "a[data-admin-page]"
-        ).forEach(function (link) {
+        document.querySelectorAll("a[data-admin-page]").forEach(function (link) {
 
             link.classList.remove("active");
 
@@ -675,11 +552,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.origin
             ).pathname;
 
-
             if (linkPath === targetPath) {
-
                 link.classList.add("active");
-
             }
 
         });
@@ -687,43 +561,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
     // LOADING
-    // ------------------------------------------
 
     function showLoading() {
 
         content.innerHTML = `
-
             <div class="page-loading">
-
                 <i class="fas fa-spinner fa-spin"></i>
-
                 <h5>Loading page...</h5>
-
                 <p>Please wait.</p>
-
             </div>
-
         `;
 
     }
 
 
-    // ------------------------------------------
     // CHART
-    // ------------------------------------------
 
     function drawChart() {
 
-        const canvas = document.getElementById(
-            "salesChart"
-        );
+        const canvas = document.getElementById("salesChart");
 
         if (!canvas || typeof Chart === "undefined") {
             return;
         }
-
 
         const existingChart = Chart.getChart(canvas);
 
@@ -731,28 +592,12 @@ document.addEventListener("DOMContentLoaded", function () {
             existingChart.destroy();
         }
 
-
         const ctx = canvas.getContext("2d");
 
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
 
-        const gradient = ctx.createLinearGradient(
-            0,
-            0,
-            0,
-            400
-        );
-
-
-        gradient.addColorStop(
-            0,
-            "rgba(249, 115, 22, 0.2)"
-        );
-
-        gradient.addColorStop(
-            1,
-            "rgba(249, 115, 22, 0)"
-        );
-
+        gradient.addColorStop(0, "rgba(249, 115, 22, 0.2)");
+        gradient.addColorStop(1, "rgba(249, 115, 22, 0)");
 
         new Chart(ctx, {
 
@@ -761,7 +606,6 @@ document.addEventListener("DOMContentLoaded", function () {
             data: {
 
                 labels: [
-
                     "Mon",
                     "Tue",
                     "Wed",
@@ -769,7 +613,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Fri",
                     "Sat",
                     "Sun"
-
                 ],
 
                 datasets: [{
@@ -777,7 +620,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: "Revenue (ETB)",
 
                     data: [
-
                         12000,
                         19000,
                         15000,
@@ -785,25 +627,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         22000,
                         30000,
                         35000
-
                     ],
 
                     borderColor: "#f97316",
-
                     backgroundColor: gradient,
-
                     borderWidth: 2,
-
                     pointBackgroundColor: "#fff",
-
                     pointBorderColor: "#f97316",
-
                     pointBorderWidth: 2,
-
                     pointRadius: 4,
-
                     fill: true,
-
                     tension: 0.4
 
                 }]
@@ -815,39 +648,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 responsive: true,
 
                 plugins: {
-
                     legend: {
-
                         display: false
-
                     }
-
                 },
 
                 scales: {
 
                     y: {
-
                         beginAtZero: true,
-
                         grid: {
-
                             borderDash: [2, 4],
-
                             color: "#e2e8f0"
-
                         }
-
                     },
 
                     x: {
-
                         grid: {
-
                             display: false
-
                         }
-
                     }
 
                 }
@@ -859,356 +678,266 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
-    // PRODUCT FORM
-    // ------------------------------------------
+    // JSON RESPONSE
 
-    function initializeProductForm() {
+    async function readJsonResponse(response) {
 
-        const form = document.getElementById(
-            "productForm"
-        );
+        const contentType =
+            response.headers.get("content-type") || "";
 
+        if (!contentType.includes("application/json")) {
 
-        if (
-            !form ||
-            form.dataset.init === "true"
-        ) {
-            return;
-        }
-
-
-        form.dataset.init = "true";
-
-
-        const imageInput = document.getElementById("image");
-
-        const imagePreview = document.getElementById("imagePreview");
-
-        const previewContainer = document.getElementById("previewContainer");
-
-        const imageName = document.getElementById("imageName");
-
-        const uploadZone = document.getElementById("uploadZone");
-
-        const removeBtn = document.getElementById("removeImageBtn");
-
-        const saveBtn = document.getElementById("saveButton");
-
-        const messageArea = document.getElementById("addProductMessages");
-
-        const clearBtn = document.getElementById("clearProductButton");
-
-
-        // --------------------------------------
-        // IMAGE PREVIEW
-        // --------------------------------------
-
-        if (imageInput && imagePreview) {
-
-            imageInput.addEventListener(
-                "change",
-                function () {
-
-                    const file = this.files && this.files[0];
-
-                    if (!file) {
-                        return;
-                    }
-
-
-                    const allowedTypes = [
-
-                        "image/jpeg",
-                        "image/png",
-                        "image/webp"
-
-                    ];
-
-
-                    if (!allowedTypes.includes(file.type)) {
-
-                        alert(
-                            "Please select a JPG, PNG, or WEBP image."
-                        );
-
-                        this.value = "";
-
-                        return;
-
-                    }
-
-
-                    if (file.size > 5 * 1024 * 1024) {
-
-                        alert(
-                            "Image is too large. Maximum size is 5MB."
-                        );
-
-                        this.value = "";
-
-                        return;
-
-                    }
-
-
-                    const reader = new FileReader();
-
-
-                    reader.onload = function (event) {
-
-                        imagePreview.src = event.target.result;
-
-
-                        if (imageName) {
-
-                            imageName.textContent = file.name;
-
-                        }
-
-
-                        if (previewContainer) {
-
-                            previewContainer.style.display = "block";
-
-                        }
-
-
-                        if (uploadZone) {
-
-                            uploadZone.style.display = "none";
-
-                        }
-
-                    };
-
-
-                    reader.readAsDataURL(file);
-
-                }
-            );
-
-        }
-
-
-        // --------------------------------------
-        // REMOVE IMAGE
-        // --------------------------------------
-
-        if (removeBtn) {
-
-            removeBtn.addEventListener(
-                "click",
-                function () {
-
-                    if (imageInput) {
-
-                        imageInput.value = "";
-
-                    }
-
-
-                    if (imagePreview) {
-
-                        imagePreview.src = "";
-
-                    }
-
-
-                    if (previewContainer) {
-
-                        previewContainer.style.display = "none";
-
-                    }
-
-
-                    if (uploadZone) {
-
-                        uploadZone.style.display = "block";
-
-                    }
-
-
-                    if (imageName) {
-
-                        imageName.textContent = "";
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        // --------------------------------------
-        // CLEAR FORM
-        // --------------------------------------
-
-        if (clearBtn) {
-
-            clearBtn.addEventListener(
-                "click",
-                function () {
-
-                    if (messageArea) {
-
-                        messageArea.textContent = "";
-
-                    }
-
-
-                    window.setTimeout(function () {
-
-                        if (removeBtn) {
-
-                            removeBtn.click();
-
-                        }
-
-                    }, 0);
-
-                }
-            );
-
-        }
-
-
-        // --------------------------------------
-        // SUBMIT PRODUCT FORM
-        // --------------------------------------
-
-        form.addEventListener(
-            "submit",
-            async function (event) {
-
-                event.preventDefault();
-
-
-                if (form.dataset.submitting === "true") {
-                    return;
-                }
-
-
-                form.dataset.submitting = "true";
-
-
-                const originalButton = saveBtn
-                    ? saveBtn.innerHTML
-                    : "Save Product";
-
-
-                if (saveBtn) {
-
-                    saveBtn.disabled = true;
-
-                    saveBtn.innerHTML = `
-
-                        <span class="spinner-border spinner-border-sm me-2"></span>
-
-                        Saving...
-
-                    `;
-
-                }
-
-
-                if (messageArea) {
-
-                    messageArea.textContent = "";
-
-                }
-
-
-                try {
-
-                    const response = await fetch(
-                        form.action,
-                        {
-
-                            method: "POST",
-
-                            body: new FormData(form),
-
-                            credentials: "same-origin",
-
-                            headers: {
-
-                                "X-Requested-With": "XMLHttpRequest",
-
-                                "Accept": "application/json"
-
-                            }
-
-                        }
-                    );
-
-
-                    const data = await readJsonResponse(response);
-
-
-                    if (!response.ok || !data.success) {
-
-                        throw new Error(
-                            data.message || "Unable to save product."
-                        );
-
-                    }
-
-
-                    await loadAdminPage(
-
-                        data.redirect ||
-                        data.redirect_url ||
-                        "/admin/products",
-
-                        "Product Management",
-
-                        "View and manage your products",
-
-                        true
-
-                    );
-
-
-                } catch (error) {
-
-                    if (messageArea) {
-
-                        const alertBox = document.createElement("div");
-
-                        alertBox.className = "alert alert-danger";
-
-                        alertBox.textContent = error.message;
-
-                        messageArea.replaceChildren(alertBox);
-
-                    }
-
-                } finally {
-
-                    form.dataset.submitting = "false";
-
-
-                    if (saveBtn) {
-
-                        saveBtn.disabled = false;
-
-                        saveBtn.innerHTML = originalButton;
-
-                    }
-
-                }
-
+            if (response.redirected) {
+                window.location.href = response.url;
+                throw new Error("Redirecting...");
             }
-        );
+
+            throw new Error(
+                "The server did not return JSON. Check the Flask route and AJAX response."
+            );
+
+        }
+
+        return await response.json();
 
     }
 
 
-    // ------------------------------------------
+    // PRODUCT FORM
+
+    function initializeProductForm() {
+
+        const form = document.getElementById("productForm");
+
+        if (!form || form.dataset.init === "true") {
+            return;
+        }
+
+        form.dataset.init = "true";
+
+        const imageInput = document.getElementById("image");
+        const imagePreview = document.getElementById("imagePreview");
+        const previewContainer = document.getElementById("previewContainer");
+        const imageName = document.getElementById("imageName");
+        const uploadZone = document.getElementById("uploadZone");
+        const removeBtn = document.getElementById("removeImageBtn");
+        const saveBtn = document.getElementById("saveButton");
+        const messageArea = document.getElementById("addProductMessages");
+        const clearBtn = document.getElementById("clearProductButton");
+
+
+        // IMAGE PREVIEW
+
+        if (imageInput && imagePreview) {
+
+            imageInput.addEventListener("change", function () {
+
+                const file = this.files && this.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                const allowedTypes = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+                ];
+
+                if (!allowedTypes.includes(file.type)) {
+
+                    alert("Please select a JPG, PNG, or WEBP image.");
+
+                    this.value = "";
+
+                    return;
+
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+
+                    alert("Image is too large. Maximum size is 5MB.");
+
+                    this.value = "";
+
+                    return;
+
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+
+                    imagePreview.src = event.target.result;
+
+                    if (imageName) {
+                        imageName.textContent = file.name;
+                    }
+
+                    if (previewContainer) {
+                        previewContainer.style.display = "block";
+                    }
+
+                    if (uploadZone) {
+                        uploadZone.style.display = "none";
+                    }
+
+                };
+
+                reader.readAsDataURL(file);
+
+            });
+
+        }
+
+
+        // REMOVE IMAGE
+
+        if (removeBtn) {
+
+            removeBtn.addEventListener("click", function () {
+
+                if (imageInput) {
+                    imageInput.value = "";
+                }
+
+                if (imagePreview) {
+                    imagePreview.src = "";
+                }
+
+                if (previewContainer) {
+                    previewContainer.style.display = "none";
+                }
+
+                if (uploadZone) {
+                    uploadZone.style.display = "block";
+                }
+
+                if (imageName) {
+                    imageName.textContent = "";
+                }
+
+            });
+
+        }
+
+
+        // CLEAR FORM
+
+        if (clearBtn) {
+
+            clearBtn.addEventListener("click", function () {
+
+                if (messageArea) {
+                    messageArea.textContent = "";
+                }
+
+                window.setTimeout(function () {
+
+                    if (removeBtn) {
+                        removeBtn.click();
+                    }
+
+                }, 0);
+
+            });
+
+        }
+
+
+        // SUBMIT PRODUCT FORM
+
+        form.addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            if (form.dataset.submitting === "true") {
+                return;
+            }
+
+            form.dataset.submitting = "true";
+
+            const originalButton = saveBtn
+                ? saveBtn.innerHTML
+                : "Save Product";
+
+            if (saveBtn) {
+
+                saveBtn.disabled = true;
+
+                saveBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Saving...
+                `;
+
+            }
+
+            if (messageArea) {
+                messageArea.textContent = "";
+            }
+
+            try {
+
+                const response = await fetch(form.action, {
+
+                    method: "POST",
+
+                    body: new FormData(form),
+
+                    credentials: "same-origin",
+
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    }
+
+                });
+
+                const data = await readJsonResponse(response);
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || "Unable to save product.");
+                }
+
+                await loadAdminPage(
+                    data.redirect || data.redirect_url || "/admin/products",
+                    "Product Management",
+                    "View and manage your products",
+                    true
+                );
+
+            } catch (error) {
+
+                if (messageArea) {
+
+                    const alertBox = document.createElement("div");
+
+                    alertBox.className = "alert alert-danger";
+                    alertBox.textContent = error.message;
+
+                    messageArea.replaceChildren(alertBox);
+
+                }
+
+            } finally {
+
+                form.dataset.submitting = "false";
+
+                if (saveBtn) {
+
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalButton;
+
+                }
+
+            }
+
+        });
+
+    }
+
+
     // INITIALIZE CURRENT PAGE
-    // ------------------------------------------
 
     function initializeCurrentPage() {
 
@@ -1216,91 +945,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
         drawChart();
 
-
         document.dispatchEvent(
-
             new CustomEvent("admin:page-initialized")
-
         );
 
     }
 
 
-    // ------------------------------------------
-    // JSON RESPONSE
-    // ------------------------------------------
-
-    async function readJsonResponse(response) {
-
-        const contentType =
-            response.headers.get("content-type") || "";
-
-
-        if (!contentType.includes("application/json")) {
-
-            if (response.redirected) {
-
-                window.location.href = response.url;
-
-                throw new Error("Redirecting...");
-
-            }
-
-
-            throw new Error(
-
-                "The server did not return JSON. Check the Flask route and AJAX response."
-
-            );
-
-        }
-
-
-        return await response.json();
-
-    }
-
-
-    // ------------------------------------------
     // FORM ERROR
-    // ------------------------------------------
 
     function showFormError(form, message) {
 
-        let alertBox = form.querySelector(
-            ".ajax-form-error"
-        );
-
+        let alertBox = form.querySelector(".ajax-form-error");
 
         if (!alertBox) {
 
             alertBox = document.createElement("div");
 
-            alertBox.className =
-                "alert alert-danger ajax-form-error mt-3";
+            alertBox.className = "alert alert-danger ajax-form-error mt-3";
 
             form.prepend(alertBox);
 
         }
 
-
         alertBox.textContent = message;
 
-
         alertBox.scrollIntoView({
-
             behavior: "smooth",
-
             block: "nearest"
-
         });
 
     }
 
 
-    // ------------------------------------------
     // AJAX FORM SUBMISSION
-    // ------------------------------------------
 
     async function submitAdminForm(form) {
 
@@ -1308,48 +986,35 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
         form.dataset.submitting = "true";
 
-
         const submitButton = form.querySelector(
-
             'button[type="submit"], input[type="submit"]'
-
         );
-
 
         const originalButtonContent = submitButton
             ? submitButton.innerHTML
             : null;
 
-
         if (submitButton) {
 
             submitButton.disabled = true;
 
-
             if (submitButton.tagName === "BUTTON") {
 
                 submitButton.innerHTML = `
-
                     <span class="spinner-border spinner-border-sm me-2"></span>
-
                     Processing...
-
                 `;
 
             }
 
         }
 
-
         try {
 
             const response = await fetch(
-
                 form.action || window.location.href,
-
                 {
 
                     method: (form.method || "POST").toUpperCase(),
@@ -1359,72 +1024,44 @@ document.addEventListener("DOMContentLoaded", function () {
                     credentials: "same-origin",
 
                     headers: {
-
                         "X-Requested-With": "XMLHttpRequest",
-
                         "Accept": "application/json"
-
                     }
 
                 }
-
             );
-
 
             const data = await readJsonResponse(response);
 
-
             if (!response.ok || !data.success) {
-
-                throw new Error(
-
-                    data.message || "The requested action failed."
-
-                );
-
+                throw new Error(data.message || "The requested action failed.");
             }
 
-
             const destination =
-
                 data.redirect ||
-
                 data.redirect_url ||
-
                 window.location.pathname + window.location.search;
 
-
             await loadAdminPage(
-
                 destination,
-
                 data.title || null,
-
                 data.subtitle || null,
-
                 true
-
             );
-
 
         } catch (error) {
 
             form.dataset.submitting = "false";
 
-
             if (submitButton) {
 
                 submitButton.disabled = false;
 
-
                 if (originalButtonContent !== null) {
-
                     submitButton.innerHTML = originalButtonContent;
-
                 }
 
             }
-
 
             showFormError(form, error.message);
 
@@ -1433,36 +1070,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
-    // AJAX NAVIGATION
-    // ------------------------------------------
+    // AJAX PAGE LOADING
 
-    async function loadAdminPage(
-
-        url,
-
-        title,
-
-        subtitle,
-
-        pushHistory = true
-
-    ) {
+    async function loadAdminPage(url, title, subtitle, pushHistory = true) {
 
         if (currentController) {
-
             currentController.abort();
-
         }
-
 
         const controller = new AbortController();
 
         currentController = controller;
 
-
         showLoading();
-
 
         try {
 
@@ -1473,108 +1093,62 @@ document.addEventListener("DOMContentLoaded", function () {
                 credentials: "same-origin",
 
                 headers: {
-
                     "X-Requested-With": "XMLHttpRequest",
-
                     "Accept": "text/html"
-
                 },
 
                 signal: controller.signal
 
             });
 
-
             if (response.redirected) {
-
                 window.location.href = response.url;
-
                 return;
-
             }
-
 
             if (!response.ok) {
-
-                throw new Error(
-
-                    "Unable to load page. HTTP " + response.status
-
-                );
-
+                throw new Error("Unable to load page. HTTP " + response.status);
             }
 
-
             const html = await response.text();
-
 
             if (controller !== currentController) {
                 return;
             }
 
-
             content.innerHTML = html;
-
 
             updateHeader(title, subtitle);
 
-
             setActiveMenu(url);
-
 
             if (pushHistory) {
 
                 history.pushState(
-
                     {
-
                         url: url,
-
                         title: title,
-
                         subtitle: subtitle
-
                     },
-
                     "",
-
                     url
-
                 );
 
             }
 
-
             if (sidebar) {
-
                 sidebar.classList.remove("show");
-
             }
-
 
             initializeCurrentPage();
 
-
             document.dispatchEvent(
-
-                new CustomEvent(
-
-                    "admin:page-loaded",
-
-                    {
-
-                        detail: {
-
-                            url: url
-
-                        }
-
+                new CustomEvent("admin:page-loaded", {
+                    detail: {
+                        url: url
                     }
-
-                )
-
+                })
             );
-
 
         } catch (error) {
 
@@ -1582,39 +1156,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-
             content.innerHTML = `
-
                 <div class="ajax-error">
-
                     <h5>
-
                         <i class="fas fa-triangle-exclamation me-2"></i>
-
                         Page Loading Failed
-
                     </h5>
-
                     <p>${escapeHtml(error.message)}</p>
-
                     <button class="btn btn-danger btn-sm"
                             type="button"
                             id="ajaxReloadButton">
-
                         Reload Page
-
                     </button>
-
                 </div>
-
             `;
 
         } finally {
 
             if (controller === currentController) {
-
                 currentController = null;
-
             }
 
         }
@@ -1622,325 +1182,208 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
     // RELOAD ERROR BUTTON
-    // ------------------------------------------
 
-    document.addEventListener(
-        "click",
-        function (event) {
+    document.addEventListener("click", function (event) {
 
-            const reloadButton = event.target.closest(
-                "#ajaxReloadButton"
-            );
+        const reloadButton = event.target.closest("#ajaxReloadButton");
 
-
-            if (reloadButton) {
-
-                window.location.reload();
-
-            }
-
+        if (reloadButton) {
+            window.location.reload();
         }
-    );
+
+    });
 
 
-    // ------------------------------------------
     // SIDEBAR AJAX NAVIGATION
-    // ------------------------------------------
 
-    document.addEventListener(
-        "click",
-        function (event) {
+    document.addEventListener("click", function (event) {
 
-            const link = event.target.closest(
-                "a[data-admin-page]"
-            );
+        const link = event.target.closest("a[data-admin-page]");
 
-
-            if (!link) {
-                return;
-            }
-
-
-            if (
-
-                event.ctrlKey ||
-
-                event.metaKey ||
-
-                event.shiftKey ||
-
-                event.altKey ||
-
-                event.button !== 0
-
-            ) {
-
-                return;
-
-            }
-
-
-            event.preventDefault();
-
-
-            loadAdminPage(
-
-                link.href,
-
-                link.dataset.title,
-
-                link.dataset.subtitle,
-
-                true
-
-            );
-
+        if (!link) {
+            return;
         }
-    );
+
+        if (
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey ||
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        loadAdminPage(
+            link.href,
+            link.dataset.title,
+            link.dataset.subtitle,
+            true
+        );
+
+    });
 
 
-    // ------------------------------------------
     // OTHER ADMIN LINKS
-    // ------------------------------------------
 
-    document.addEventListener(
-        "click",
-        function (event) {
+    document.addEventListener("click", function (event) {
 
-            const link = event.target.closest(
-                "a:not([data-admin-page])"
-            );
+        const link = event.target.closest("a:not([data-admin-page])");
+
+        if (!link) {
+            return;
+        }
+
+        if (!link.pathname.startsWith("/admin/")) {
+            return;
+        }
+
+        if (
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey ||
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        if (link.target === "_blank") {
+            return;
+        }
+
+        event.preventDefault();
+
+        let title = "Admin Panel";
+        let subtitle = "";
+
+        if (link.pathname.includes("/admin/orders/")) {
+
+            title = "Order Details";
+            subtitle = "View order information";
+
+        } else if (link.pathname.includes("/admin/support/")) {
+
+            title = "Support Conversation";
+            subtitle = "Reply to customer";
+
+        } else if (link.pathname.includes("/admin/payments/")) {
+
+            title = "Payment Details";
+            subtitle = "Review customer payment";
+
+        }
+
+        loadAdminPage(
+            link.href,
+            title,
+            subtitle,
+            true
+        );
+
+    });
 
 
-            if (!link) {
-                return;
-            }
+    // GLOBAL ADMIN FORMS
 
+    document.addEventListener("submit", function (event) {
 
-            if (!link.pathname.startsWith("/admin/")) {
-                return;
-            }
+        const form = event.target;
 
+        if (!form || !content.contains(form)) {
+            return;
+        }
 
-            if (
+        if (event.defaultPrevented) {
+            return;
+        }
 
-                event.ctrlKey ||
+        if (
+            form.id === "paymentDecisionForm" ||
+            form.matches("[data-payment-native-form]")
+        ) {
+            return;
+        }
 
-                event.metaKey ||
+        if (form.id === "productForm") {
+            return;
+        }
 
-                event.shiftKey ||
+        if (form.dataset.nativeForm === "true") {
+            return;
+        }
 
-                event.altKey ||
+        const method = (form.method || "GET").toLowerCase();
 
-                event.button !== 0
-
-            ) {
-
-                return;
-
-            }
-
-
-            if (link.target === "_blank") {
-                return;
-            }
-
+        if (method === "post") {
 
             event.preventDefault();
 
+            submitAdminForm(form);
 
-            let title = "Admin Panel";
+            return;
 
-            let subtitle = "";
+        }
 
+        if (method === "get") {
 
-            if (link.pathname.includes("/admin/orders/")) {
+            event.preventDefault();
 
-                title = "Order Details";
+            const url = new URL(
+                form.action || window.location.href
+            );
 
-                subtitle = "View order information";
+            const params = new URLSearchParams(
+                new FormData(form)
+            );
 
-            } else if (link.pathname.includes("/admin/support/")) {
-
-                title = "Support Conversation";
-
-                subtitle = "Reply to customer";
-
-            } else if (link.pathname.includes("/admin/payments/")) {
-
-                title = "Payment Details";
-
-                subtitle = "Review customer payment";
-
-            }
-
+            url.search = params.toString();
 
             loadAdminPage(
-
-                link.href,
-
-                title,
-
-                subtitle,
-
+                url.toString(),
+                null,
+                null,
                 true
-
             );
 
         }
-    );
+
+    });
 
 
-    // ------------------------------------------
-    // GLOBAL ADMIN FORMS
-    // ------------------------------------------
-
-    document.addEventListener(
-        "submit",
-        function (event) {
-
-            const form = event.target;
-
-
-            if (!form || !content.contains(form)) {
-                return;
-            }
-
-
-            if (event.defaultPrevented) {
-                return;
-            }
-
-
-            // PAYMENT FORMS: normal browser POST.
-
-            if (
-
-                form.id === "paymentDecisionForm" ||
-
-                form.matches("[data-payment-native-form]")
-
-            ) {
-
-                return;
-
-            }
-
-
-            // Product form has its own AJAX handler.
-
-            if (form.id === "productForm") {
-                return;
-            }
-
-
-            // Native forms are not intercepted.
-
-            if (form.dataset.nativeForm === "true") {
-                return;
-            }
-
-
-            const method = (form.method || "GET").toLowerCase();
-
-
-            if (method === "post") {
-
-                event.preventDefault();
-
-                submitAdminForm(form);
-
-                return;
-
-            }
-
-
-            if (method === "get") {
-
-                event.preventDefault();
-
-
-                const url = new URL(
-
-                    form.action || window.location.href
-
-                );
-
-
-                const params = new URLSearchParams(
-
-                    new FormData(form)
-
-                );
-
-
-                url.search = params.toString();
-
-
-                loadAdminPage(
-
-                    url.toString(),
-
-                    null,
-
-                    null,
-
-                    true
-
-                );
-
-            }
-
-        }
-    );
-
-
-    // ------------------------------------------
     // BACK AND FORWARD NAVIGATION
-    // ------------------------------------------
 
-    window.addEventListener(
-        "popstate",
-        function (event) {
+    window.addEventListener("popstate", function (event) {
 
-            if (event.state && event.state.url) {
+        if (event.state && event.state.url) {
 
-                loadAdminPage(
+            loadAdminPage(
+                event.state.url,
+                event.state.title,
+                event.state.subtitle,
+                false
+            );
 
-                    event.state.url,
+        } else {
 
-                    event.state.title,
-
-                    event.state.subtitle,
-
-                    false
-
-                );
-
-            } else {
-
-                window.location.reload();
-
-            }
+            window.location.reload();
 
         }
-    );
+
+    });
 
 
-    // ------------------------------------------
     // INITIAL SETUP
-    // ------------------------------------------
 
     setActiveMenu(window.location.href);
 
     initializeCurrentPage();
 
 
-    // ------------------------------------------
     // ADMIN NOTIFICATIONS
-    // ------------------------------------------
 
     async function updateNotifications() {
 
@@ -1951,16 +1394,12 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
         notificationInProgress = true;
-
 
         try {
 
             const response = await fetch(
-
                 "/api/admin/notifications",
-
                 {
 
                     method: "GET",
@@ -1968,32 +1407,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     credentials: "same-origin",
 
                     headers: {
-
                         "Accept": "application/json",
-
                         "X-Requested-With": "XMLHttpRequest"
-
                     },
 
                     cache: "no-store"
 
                 }
-
             );
-
 
             if (!response.ok) {
                 return;
             }
 
-
             const data = await response.json();
-
 
             const messageBadge = document.getElementById(
                 "sidebar-message-badge"
             );
-
 
             const paymentBadge = document.getElementById(
                 "sidebar-payment-badge"
@@ -2004,21 +1435,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (messageBadge) {
 
-                const count = Number(
-                    data.unread_count || 0
-                );
-
+                const count = Number(data.unread_count || 0);
 
                 messageBadge.textContent = count;
 
-
                 messageBadge.style.display =
-
-                    count > 0
-
-                        ? "inline-block"
-
-                        : "none";
+                    count > 0 ? "inline-block" : "none";
 
             }
 
@@ -2027,33 +1449,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (paymentBadge) {
 
-                const count = Number(
-                    data.pending_payments || 0
-                );
-
+                const count = Number(data.pending_payments || 0);
 
                 paymentBadge.textContent = count;
 
-
                 paymentBadge.style.display =
-
-                    count > 0
-
-                        ? "inline-block"
-
-                        : "none";
+                    count > 0 ? "inline-block" : "none";
 
             }
-
 
         } catch (error) {
 
             console.warn(
-
                 "Notification check failed:",
-
                 error.message
-
             );
 
         } finally {
@@ -2065,9 +1474,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
     // START NOTIFICATION POLLING
-    // ------------------------------------------
 
     function startNotificationPolling() {
 
@@ -2075,24 +1482,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
         updateNotifications();
 
-
         notificationInterval = window.setInterval(
-
             updateNotifications,
-
             10000
-
         );
 
     }
 
 
-    // ------------------------------------------
     // STOP NOTIFICATION POLLING
-    // ------------------------------------------
 
     function stopNotificationPolling() {
 
@@ -2107,55 +1507,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ------------------------------------------
     // PAGE VISIBILITY
-    // ------------------------------------------
 
-    document.addEventListener(
-        "visibilitychange",
-        function () {
+    document.addEventListener("visibilitychange", function () {
 
-            if (document.visibilityState === "visible") {
-
-                updateNotifications();
-
-            }
-
+        if (document.visibilityState === "visible") {
+            updateNotifications();
         }
-    );
+
+    });
 
 
-    // ------------------------------------------
     // RESTORE NOTIFICATION POLLING
-    // ------------------------------------------
 
-    window.addEventListener(
-        "pageshow",
-        function () {
-
-            startNotificationPolling();
-
-        }
-    );
+    window.addEventListener("pageshow", startNotificationPolling);
 
 
-    // ------------------------------------------
     // CLEANUP WHEN LEAVING
-    // ------------------------------------------
 
-    window.addEventListener(
-        "pagehide",
-        function () {
-
-            stopNotificationPolling();
-
-        }
-    );
+    window.addEventListener("pagehide", stopNotificationPolling);
 
 
-    // ------------------------------------------
     // INITIAL NOTIFICATION START
-    // ------------------------------------------
 
     startNotificationPolling();
 
