@@ -988,6 +988,25 @@
                 flex-direction: column;
             }
         }
+
+        /* Keep only the category navigation fixed */
+.navbar {
+    position: relative !important;
+    top: auto !important;
+}
+
+.category-nav {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    background: #ffffff;
+    width: 100%;
+}
+
+.category-nav-inner {
+    overflow-x: auto;
+    white-space: nowrap;
+}
     </style>
 </head>
 
